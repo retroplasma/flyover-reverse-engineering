@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message ResourceManifest {
+	string token_p2 = 30;
+}

@@ -16,6 +16,7 @@ go run auth.go [url] [session_id] [token_1] [token_2]
 
 #### Files on macOS
 - `~/Library/Preferences/com.apple.GEO.plist`
+- `~/Library/Containers/com.apple.geod/Data/Library/Caches/com.apple.geod/MapTiles/MapTiles.sqlitedb`
 - `/System/Library/PrivateFrameworks/GeoServices.framework/GeoServices`
 - `/System/Library/PrivateFrameworks/VectorKit.framework/VectorKit`
 - `/System/Library/PrivateFrameworks/GeoServices.framework/XPCServices/com.apple.geod.xpc`

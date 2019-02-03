@@ -1,5 +1,12 @@
 syntax = "proto3";
 
 message ResourceManifest {
+	repeated StyleConfig style_config = 2;
 	string token_p2 = 30;
+
+	message StyleConfig {
+		string url_prefix_1 = 1;
+		string url_prefix_2 = 9;
+		int64 style_id = 3;
+	}	
 }

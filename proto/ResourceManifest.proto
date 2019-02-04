@@ -7,6 +7,14 @@ message ResourceManifest {
 	message StyleConfig {
 		string url_prefix_1 = 1;
 		string url_prefix_2 = 9;
-		int64 style_id = 3;
+		StyleID style_id = 3;
+
+		enum StyleID {
+			_ = 0;
+			C3M = 15;
+			DTM_1 = 16;
+			DTM_2 = 17;
+			C3MM = 52;
+		}
 	}	
 }

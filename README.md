@@ -2,9 +2,27 @@
 This is an attempt to reverse-engineer the Flyover feature in Apple Maps. Main goal is to document the results and to provide code that emerges.
 
 #### Motivation
-Differences between Google Earth and Apple Flyover. Extreme example:
+Noticed differences between Google Earth and Apple Flyover during [previous project](https://github.com/retroplasma/earth-reverse-engineering). Extreme example:
 
 <img src="https://user-images.githubusercontent.com/46618410/52183147-db89e500-27fc-11e9-9c75-fc78ff6cda58.jpg" alt="Google" title="Google"  width=50%><img src="https://user-images.githubusercontent.com/46618410/52183145-d62c9a80-27fc-11e9-9396-2d0acb34ec03.jpg" alt="Apple" title="Apple" width=50%>
+
+#### General
+Data in stored in map tiles:
+
+|Type  | Purpose                         | URL structure                                        |
+|------|---------------------------------|------------------------------------------------------|
+|DTM 1 | Terrain/Surface/Elevation       | 🅐/tile?style=16&v=⓿&region=❶&x=❹&y=❺&z=❻         |
+|DTM 2 | Terrain/Surface/Elevation       | 🅐/tile?style=17&v=⓿&size=❷&scale=❸&x=❹&y=❺&z=❻  |
+|C3M   | Texture + Mesh (+ Scene Graph?) | 🅐/tile?style=15&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |
+|C3MM  | Metadata?                       | 🅐/tile?style=52&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |   
+
+- 🅐: URL prefix from resource manifest
+- ⓿: Version/edition/epoch. Where does it come from?
+- ❶↔❷❸: Others ↔ DTM_2
+- ❹❺❻: Map tile. Regular scheme?
+- ❼: Height/altitude? Only for C3M and C3MM
+
+
 
 #### Authenticate URLs
 ```

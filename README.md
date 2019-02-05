@@ -9,12 +9,12 @@ Noticed differences between Google Earth and Apple Flyover during [previous proj
 #### General
 Data in stored in map tiles:
 
-|Type  | Purpose                         | URL structure                                        |
-|------|---------------------------------|------------------------------------------------------|
-|DTM 1 | Terrain/Surface/Elevation       | 🅐(?\|&)style=16&v=⓿&region=❶&x=❹&y=❺&z=❻         |
-|DTM 2 | Terrain/Surface/Elevation       | 🅐(?\|&)style=17&v=⓿&size=❷&scale=❸&x=❹&y=❺&z=❻  |
-|C3M   | Texture + Mesh (+ Scene Graph?) | 🅐(?\|&)style=15&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |
-|C3MM  | Metadata?                       | 🅐(?\|&)style=52&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |   
+|Type  | Purpose                                     | URL structure                                        |
+|------|---------------------------------------------|------------------------------------------------------|
+|DTM 1 | Terrain/Surface/Elevation                   | 🅐(?\|&)style=16&v=⓿&region=❶&x=❹&y=❺&z=❻         |
+|DTM 2 | Terrain/Surface/Elevation                   | 🅐(?\|&)style=17&v=⓿&size=❷&scale=❸&x=❹&y=❺&z=❻  |
+|C3M   | Texture, Mesh, ECEF(, Matrix, Scene Graph?) | 🅐(?\|&)style=15&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |
+|C3MM  | Metadata?                                   | 🅐(?\|&)style=52&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |   
 
 - 🅐: URL prefix from resource manifest
 - ⓿: Version/edition/epoch. Where does it come from?

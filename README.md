@@ -17,8 +17,9 @@ Data in stored in map tiles:
 |C3MM  | Metadata?                                   | 🅐(?\|&)style=52&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |   
 
 - 🅐: URL prefix from resource manifest
-- ⓿: Version/edition/epoch. Where does it come from?
-- ❶↔❷❸: Others ↔ DTM_2
+- ⓿: Version from resource manifest or altitude manifest using region
+- ❶: From altitude manifest
+- ❷❸: wip
 - ❹❺❻: Map tile. Regular scheme?
 - ❼: Height/altitude? Only for C3M and C3MM
 

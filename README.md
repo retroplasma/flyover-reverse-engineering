@@ -14,7 +14,7 @@ Data in stored in map tiles:
 |DTM 1 | Terrain/Surface/Elevation                   | 🅐(?\|&)style=16&v=⓿&region=❶&x=❹&y=❺&z=❻         |
 |DTM 2 | Terrain/Surface/Elevation                   | 🅐(?\|&)style=17&v=⓿&size=❷&scale=❸&x=❹&y=❺&z=❻  |
 |C3M   | Texture, Mesh, ECEF(, Matrix, Scene Graph?) | 🅐(?\|&)style=15&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |
-|C3MM  | Metadata?                                   | 🅐(?\|&)style=52&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |   
+|C3MM  | Metadata                                    | 🅐(?\|&)style=52&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |   
 
 - 🅐: URL prefix from resource manifest
 - ⓿: Version from resource manifest or altitude manifest using region
@@ -35,6 +35,7 @@ go run auth.go [url] [session_id] [token_1] [token_2]
 
 #### Files on macOS
 - `~/Library/Preferences/com.apple.GEO.plist`
+- `~/Library/Caches/GeoServices/Resources/altitude-*.xml`
 - `~/Library/Containers/com.apple.geod/Data/Library/Caches/com.apple.geod/MapTiles/MapTiles.sqlitedb`
 - `/System/Library/PrivateFrameworks/GeoServices.framework/GeoServices`
 - `/System/Library/PrivateFrameworks/VectorKit.framework/VectorKit`

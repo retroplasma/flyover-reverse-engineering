@@ -13,13 +13,13 @@ Data in stored in map tiles:
 |------|---------------------------------------------|------------------------------------------------------|
 |DTM 1 | Terrain/Surface/Elevation                   | 🅐(?\|&)style=16&v=⓿&region=❶&x=❹&y=❺&z=❻         |
 |DTM 2 | Terrain/Surface/Elevation                   | 🅐(?\|&)style=17&v=⓿&size=❷&scale=❸&x=❹&y=❺&z=❻  |
-|C3M   | Texture, Mesh, ECEF(, Matrix, Scene Graph?) | 🅐(?\|&)style=15&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |
+|C3M   | Texture, Mesh, ECEF, Rotation, Scene Graph? | 🅐(?\|&)style=15&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |
 |C3MM  | Metadata                                    | 🅐(?\|&)style=52&v=⓿&region=❶&x=❹&y=❺&z=❻&h=❼    |   
 
 - 🅐: URL prefix from resource manifest
 - ⓿: Version from resource manifest or altitude manifest using region
 - ❶: From altitude manifest
-- ❷❸: wip
+- ❷❸: todo
 - ❹❺❻: Map tile. Regular scheme?
 - ❼: Height/altitude? Only for C3M and C3MM
 

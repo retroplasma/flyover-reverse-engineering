@@ -104,26 +104,26 @@ func parseHeader(data []byte, offset *int) {
 	qy := readFloat64(data, *offset+17)
 	qz := readFloat64(data, *offset+25)
 	qw := readFloat64(data, *offset+33)
-	l.Printf("Rotation Quaternion XYZW:     [% 16f,% 16f,% 15f,% f ]\n", qx, qy, qz, qw)
+	l.Printf("Rotation Quaternion XYZW:     [ %f, %f, %f, %f ]\n", qx, qy, qz, qw)
 
 	x := readFloat64(data, *offset+41)
 	y := readFloat64(data, *offset+49)
 	z := readFloat64(data, *offset+57)
-	l.Printf("Translation ECEF XYZ:         [% 16f,% 16f,% 15f ]\n", x, y, z)
+	l.Printf("Translation ECEF XYZ:         [ %f, %f, %f ]\n", x, y, z)
 
 	m0 := 1 - 2*qy*qy - 2*qz*qz
-	m1 := 2*qx*qy + 2*qw*qz
-	m2 := 2*qx*qz - 2*qw*qy
-	m3 := 2*qx*qy - 2*qw*qz
+	m1 := 2*qx*qy - 2*qw*qz
+	m2 := 2*qx*qz + 2*qw*qy
+	m3 := 2*qx*qy + 2*qw*qz
 	m4 := 1 - 2*qx*qx - 2*qz*qz
-	m5 := 2*qy*qz + 2*qw*qx
-	m6 := 2*qx*qz + 2*qw*qy
-	m7 := 2*qy*qz - 2*qw*qx
+	m5 := 2*qy*qz - 2*qw*qx
+	m6 := 2*qx*qz - 2*qw*qy
+	m7 := 2*qy*qz + 2*qw*qx
 	m8 := 1 - 2*qx*qx - 2*qy*qy
-	l.Printf("=> Transformation Matrix 4x4: [% 16f,% 16f,% 15f,% f,\n", m0, m1, m2, 0.0)
-	l.Printf("                               % 16f,% 16f,% 15f,% f,\n", m3, m4, m5, 0.0)
-	l.Printf("                               % 16f,% 16f,% 15f,% f,\n", m6, m7, m8, 0.0)
-	l.Printf("                               % 16f,% 16f,% 15f,% f ]\n", x, y, z, 1.0)
+	l.Printf("=> Transformation Matrix 4x4: [% f,% f,% f,% f,\n", m0, m1, m2, x)
+	l.Printf("                               % f,% f,% f,% f,\n", m3, m4, m5, y)
+	l.Printf("                               % f,% f,% f,% f,\n", m6, m7, m8, z)
+	l.Printf("                               % f,% f,% f,% f ]\n", 0.0, 0.0, 0.0, 1.0)
 
 	*offset += 113
 }
@@ -144,7 +144,7 @@ func parseMaterial(data []byte, offset *int) {
 
 		switch materialType {
 		case 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10:
-			l.Printf("- Material type %d", materialType)
+			l.Printf("- Material type: %d", materialType)
 			l.SetPrefix(l.Prefix() + "  ")
 
 			textureFormat := data[*offset+3]

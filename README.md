@@ -1,5 +1,5 @@
 
-This is an attempt to reverse-engineer the Flyover feature in Apple Maps. Main goal is to document the results and to provide code that emerges.
+This is an attempt to reverse-engineer *Flyover* (= 3D satellite mode) in Apple Maps. Main goal is to document the results and to provide code that emerges.
 
 #### Motivation
 Noticed differences between Google Earth and Apple Flyover during [previous project](https://github.com/retroplasma/earth-reverse-engineering). Extreme example:

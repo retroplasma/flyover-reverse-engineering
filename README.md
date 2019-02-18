@@ -40,11 +40,20 @@ go run cmd/parse-c3m/main.go [file]
 
 #### Files on macOS
 - `~/Library/Preferences/com.apple.GEO.plist`
+  - last resource manifest url
 - `~/Library/Caches/GeoServices/Resources/altitude-*.xml`
+  - defines regions for c3m urls
+  - `altitude-*.xml` url in resource manifest
 - `~/Library/Containers/com.apple.geod/Data/Library/Caches/com.apple.geod/MapTiles/MapTiles.sqlitedb`
+  - local map tile cache
 - `/System/Library/PrivateFrameworks/GeoServices.framework/GeoServices`
+  - resource manifest base url, networking, caching, authentication
 - `/System/Library/PrivateFrameworks/VectorKit.framework/VectorKit`
+  - parsers, decoders
 - `/System/Library/PrivateFrameworks/GeoServices.framework/XPCServices/com.apple.geod.xpc`
+  - loads `GeoServices`
+- `/Applications/Maps.app/Contents/MacOS/Maps`
+  - loads `VectorKit`
 
 #### Important
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

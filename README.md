@@ -27,11 +27,16 @@ Data in stored in map tiles:
 
 #### Authenticate URLs
 ```
-go run auth.go [url] [session_id] [token_1] [token_2]
+go run cmd/auth/main.go [url] [session_id] [token_1] [token_2]
 ```
 - `session_id`: 40 digits
 - `token_1`: see GeoServices binary (function: GEOURLAuthenticationGenerateURL)
 - `token_2`: see Geo Resource Manifest config (protobuf field 30)
+
+#### Parse C3M file (WIP)
+```
+go run cmd/parse-c3m/main.go [file]
+```
 
 #### Files on macOS
 - `~/Library/Preferences/com.apple.GEO.plist`

@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// AbbrHexStr produces an abbreviated hex string from b and adds "..." if its longer than l
 func AbbrHexStr(b []byte, l int) string {
 	if len(b) == 0 {
 		return "-"
@@ -17,11 +18,14 @@ func AbbrHexStr(b []byte, l int) string {
 	return abrv
 }
 
+// CheckPanic panics if e is not null
 func CheckPanic(e error) {
 	if e != nil {
 		panic(e)
 	}
 }
+
+// Min returns the minimum of two integers
 func Min(x, y int) int {
 	if x < y {
 		return x
@@ -29,6 +33,7 @@ func Min(x, y int) int {
 	return y
 }
 
+// Max returns the maximum of two integers
 func Max(x, y int) int {
 	if x > y {
 		return x

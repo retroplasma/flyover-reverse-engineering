@@ -326,7 +326,7 @@ func decodeUsingTable(data []byte, len1 int, len2 int, table ebTable, writeBuf *
 	writeBufOff := 0
 	for {
 		if readShift1 <= 0 {
-			input1 |= uint64(bin.ByteSwapUInt32(bin.ReadUInt32(readBuf, readBufOff))) << uint(32-uint8(readShift1))
+			input1 |= uint64(bin.ReadUInt32BE(readBuf, readBufOff)) << uint(32-readShift1)
 			readShift1 += 32
 			readBufOff += 4
 		}
@@ -337,7 +337,7 @@ func decodeUsingTable(data []byte, len1 int, len2 int, table ebTable, writeBuf *
 		var tblFstIdx uint64
 		if shiftTest > 15 {
 			if readShift1 <= 16 {
-				input2 |= uint64(bin.ByteSwapUInt32(bin.ReadUInt32(readBuf, readBufOff))) << uint(33-uint8(readShift1))
+				input2 |= uint64(bin.ReadUInt32BE(readBuf, readBufOff)) << uint(33-readShift1)
 				readBufOff += 4
 				readShift2 = readShift1 + 31
 			}
@@ -345,7 +345,7 @@ func decodeUsingTable(data []byte, len1 int, len2 int, table ebTable, writeBuf *
 		} else {
 			if readShift1 <= int(shiftTest) {
 				l.Println("not visited. check values when visited #1")
-				input2 |= uint64(bin.ByteSwapUInt32(bin.ReadUInt32(readBuf, readBufOff))) << uint(33-uint8(readShift1))
+				input2 |= uint64(bin.ReadUInt32BE(readBuf, readBufOff)) << uint(33-readShift1)
 				readBufOff += 4
 				readShift2 = readShift1 + 31
 			}
@@ -357,14 +357,14 @@ func decodeUsingTable(data []byte, len1 int, len2 int, table ebTable, writeBuf *
 			tblFstValNeg := -tblFstVal
 			tblIdx := bin.ReadInt32(tblFst, 8*int(tblFstIdx))
 			if readShift2 <= 15 {
-				input2 |= uint64(bin.ByteSwapUInt32(bin.ReadUInt32(readBuf, readBufOff))) << uint(32-uint8(readShift2))
+				input2 |= uint64(bin.ReadUInt32BE(readBuf, readBufOff)) << uint(32-readShift2)
 				readShift2 += 32
 				readBufOff += 4
 			}
 			readShift3 := readShift2 - 16
 			input3 := input2 << 16
 			if readShift2-16 < tblFstValNeg {
-				input3 |= uint64(bin.ByteSwapUInt32(bin.ReadUInt32(readBuf, readBufOff))) << uint(48-uint8(readShift2))
+				input3 |= uint64(bin.ReadUInt32BE(readBuf, readBufOff)) << uint(48-readShift2)
 				readBufOff += 4
 				readShift3 = readShift2 + 16
 			}
@@ -372,7 +372,7 @@ func decodeUsingTable(data []byte, len1 int, len2 int, table ebTable, writeBuf *
 			tblOth := table.data[tblIdx]
 			tblOthValNeg := int(tblOth[8*tblOthIdx+4]) - 16
 			if readShift3 < tblOthValNeg {
-				input3 |= uint64(bin.ByteSwapUInt32(bin.ReadUInt32(readBuf, readBufOff))) << uint(32-uint8(readShift3))
+				input3 |= uint64(bin.ReadUInt32BE(readBuf, readBufOff)) << uint(32-readShift3)
 				readShift3 += 32
 				readBufOff += 4
 			}
@@ -386,7 +386,7 @@ func decodeUsingTable(data []byte, len1 int, len2 int, table ebTable, writeBuf *
 		} else {
 			if readShift2 < tblFstVal {
 				l.Println("not visited. check values when visited #3")
-				input2 |= uint64(bin.ByteSwapUInt32(bin.ReadUInt32(readBuf, readBufOff))) << uint(32-uint8(readShift2))
+				input2 |= uint64(bin.ReadUInt32BE(readBuf, readBufOff)) << uint(32-readShift2)
 				readShift2 += 32
 				readBufOff += 4
 			}

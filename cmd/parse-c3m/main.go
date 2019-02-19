@@ -215,7 +215,7 @@ func parseMesh(data []byte, offset *int) {
 			l.Printf("unknown_j_128_32_2: %d \n", bin.ReadInt32(data, offset3+29+8))
 			l.Printf("  multiplied by 4 sometimes")
 			dataOffset := int(bin.ReadInt32(data, offset3+29+12))
-			l.Printf("dataOffset: %d (unknown_j_128_32_3)\n", dataOffset)
+			l.Printf("dataOffset: %d (unknown_j_128_32_3) -> *\n", dataOffset)
 			l.Printf("unknown_k_32: %d \n", bin.ReadUInt32(data, offset3+45))
 
 			l.Println()
@@ -227,22 +227,41 @@ func parseMesh(data []byte, offset *int) {
 				panic("??? 2")
 			}
 
-			var bufs [10][]byte
-			read10MeshBufs(&bufs, data, dataOffset, ebta, ebtb)
+			bufs := read10MeshBufs(data, dataOffset, ebta, ebtb)
 
 			l.Printf("buf 0:")
-			l.Printf("  - int32:   %d", bin.ReadInt32(bufs[0], 0))
-			l.Printf("  - float64: %f %f %f",
-				bin.ReadFloat64(bufs[0], 4+0),
-				bin.ReadFloat64(bufs[0], 4+8),
-				bin.ReadFloat64(bufs[0], 4+16))
-			l.Printf("  - float32: %f %f %f",
-				bin.ReadFloat32(bufs[0], 28+0),
-				bin.ReadFloat32(bufs[0], 28+4),
-				bin.ReadFloat32(bufs[0], 28+8))
-			l.Printf("  - int8:    %d", bufs[0][40])
-			l.Printf("  - int32:   %d", bin.ReadInt32(bufs[0], 41))
+			b0 := bufs[0]
+			i32_0 := bin.ReadInt32(b0, 0)
+			f64_0 := bin.ReadFloat64(b0, 4)
+			f64_1 := bin.ReadFloat64(b0, 12)
+			f64_2 := bin.ReadFloat64(b0, 20)
+			f32_0 := bin.ReadFloat32(b0, 28)
+			f32_1 := bin.ReadFloat32(b0, 32)
+			f32_2 := bin.ReadFloat32(b0, 36)
+			i8_0 := bin.ReadUInt8(b0, 40)
+			res3 := bin.ReadInt32(b0, 41)
+			i32_1 := bin.ReadInt32(b0, 45)
+			i32_2 := bin.ReadInt32(b0, 49)
+			i8_1 := bin.ReadUInt8(b0, 53)
+			i32_3 := bin.ReadInt32(b0, 54)
+			i32_4 := bin.ReadUInt32(b0, 58)
 
+			l.Printf("  i32_0:    %d", i32_0)
+			l.Printf("  f64_0-2:  %f %f %f", f64_0, f64_1, f64_2)
+			l.Printf("  f32_0-2:  %f %f %f", f32_0, f32_1, f32_2)
+			l.Printf("  i8_0:     %d", i8_0)
+			l.Printf("  res3:     %d", res3)
+			l.Printf("  i32_1:    %d", i32_1)
+			l.Printf("  i32_2:    %d", i32_2)
+			l.Printf("  i8_1:     %d", i8_1)
+			l.Printf("  i32_3:    %d", i32_3)
+			l.Printf("  i32_4:    %d", i32_4)
+
+			if i32_0 < 0 || 0 == i8_0 || (i32_1|i32_2) < 0 || 0 == i8_1 || (i32_4&0x80000000) != 0 {
+				panic("incorrect values in buf 0")
+			}
+
+			// can't skip yet
 			os.Exit(0)
 
 		default:
@@ -256,8 +275,8 @@ func parseMesh(data []byte, offset *int) {
 	os.Exit(0)
 }
 
-func read10MeshBufs(bufs *[10][]byte, data []byte, dataOffset int, ebta ebTable, ebtb ebTable) {
-	l.Println("[0-9]  type  len1   len2  data")
+func read10MeshBufs(data []byte, dataOffset int, ebta ebTable, ebtb ebTable) (bufs [10][]byte) {
+	l.Println("* buf  type  len1   len2   data")
 	off := 120
 	for i := 0; i < 10; i++ {
 		len1 := int(bin.ReadUInt32(data, dataOffset+12*i))
@@ -268,17 +287,17 @@ func read10MeshBufs(bufs *[10][]byte, data []byte, dataOffset int, ebta ebTable,
 		switch val {
 		case 0:
 			buf := data[dataOffset+off : dataOffset+off+int(len2)]
-			l.Printf("- %d    0     %-5d  %-5d %s", i, len1, len2, oth.AbbrHexStr(buf, 32))
+			l.Printf("  %d    0     %-5d  %-5d  %s", i, len1, len2, oth.AbbrHexStr(buf, 32))
 			copy(outBuf, buf)
 		case 3:
 			buf := data[dataOffset+off : dataOffset+off+int(len2)]
-			l.Printf("- %d    3     %-5d  %-5d %s", i, len1, len2, oth.AbbrHexStr(buf, 32))
+			l.Printf("  %d    3     %-5d  %-5d  %s", i, len1, len2, oth.AbbrHexStr(buf, 32))
 			hp, s := ebta, "a"
 			if i == 7 {
 				hp, s = ebtb, "b"
 			}
 			decodeUsingTable(buf, len1, len2, hp, &outBuf)
-			l.Printf("  decoded (eb_table_%s):   %s", s, oth.AbbrHexStr(outBuf, 32))
+			l.Printf("  -> decoded (eb_table_%s): %s", s, oth.AbbrHexStr(outBuf, 32))
 		case 1:
 			panic("Unsupported type: 1")
 		default:
@@ -288,6 +307,7 @@ func read10MeshBufs(bufs *[10][]byte, data []byte, dataOffset int, ebta ebTable,
 
 		off += len2
 	}
+	return
 }
 
 func decodeUsingTable(data []byte, len1 int, len2 int, table ebTable, writeBuf *[]byte) {

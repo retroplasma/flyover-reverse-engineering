@@ -261,6 +261,54 @@ func parseMesh(data []byte, offset *int) {
 				panic("incorrect values in buf 0")
 			}
 
+			l.Printf("buf 5:")
+			b5 := bufs[5]
+			res9 := bin.ReadInt32(b5, 0)
+			l.Printf("  res9: %d", res9)
+			if res9 < 0 {
+				panic("incorrect values in buf 5 #1")
+			}
+			i32_0min32 := i32_0 - 32
+			fst := i32_0min32
+			snd := 32
+			buf_res9vmul3mul4_a := make([]int32, res9*3)
+			for i := 0; i < len(buf_res9vmul3mul4_a); i++ {
+				buf_res9vmul3mul4_a[i] = -1 // 0xffffffff
+			}
+			if i32_0min32 >= 128 {
+				for {
+					val_in_data5_a := bin.ReadInt32(b5, snd/8)
+					val_in_data5_b := bin.ReadInt32(b5, snd/8+4)
+					if val_in_data5_a >= 0 {
+						buf_res9vmul3mul4_a[val_in_data5_a] = val_in_data5_b
+					}
+					if val_in_data5_b >= 0 {
+						buf_res9vmul3mul4_a[val_in_data5_b] = val_in_data5_a
+					}
+
+					fst -= 64
+					snd += 64
+
+					if !(fst > 127) {
+						break
+					}
+				}
+			}
+			l.Printf("  buf_res9vmul3mul4_a len: %d", len(buf_res9vmul3mul4_a))
+
+			res1 := bin.ReadInt32(b5, snd/8)
+			l.Printf("  res1: %d", res1)
+			b5unkn32 := bin.ReadInt32(b5, snd/8+4)
+			l.Printf("  b5unkn32: %d", b5unkn32)
+
+			if (res1 | b5unkn32) < 0 {
+				panic("incorrect values in buf 5 #2")
+			}
+
+			l.Println("buf 2:")
+			_, bufCLERS := decodeCLERS(bufs[2], res9, b5unkn32, buf_res9vmul3mul4_a)
+			l.Printf("  CLERS: %s", oth.AbbrStr(fmt.Sprintf("%s", bufCLERS), 48))
+
 			// can't skip yet
 			os.Exit(0)
 
@@ -273,6 +321,124 @@ func parseMesh(data []byte, offset *int) {
 
 	// can't skip yet
 	os.Exit(0)
+}
+
+func decodeCLERS(b2 []byte, res9 int32, b5unkn32 int32, buf_res9vmul3mul4_a []int32) ([]int, []byte) {
+
+	bufMeta := make([]int, res9)
+	bufCLERS := make([]byte, res9*3)
+	writeBufOff := 0
+	if b5unkn32 == 0 {
+		writeBufOff = 0
+		if res9 > 0 {
+			writeBufOff = 1
+			bufCLERS[0] = 'P'
+		}
+	}
+
+	if writeBufOff >= int(res9) {
+		panic("not implemented: no decoding of data2")
+	}
+	var input uint64
+	rs := 0
+	bmcTmp := 0
+	updown := 0
+	var code uint64
+	readBufOff := 0
+	bufMetaCtr := bmcTmp
+
+BIG_LOOP:
+	for {
+		triCtr := 3 * writeBufOff
+		wboTmp := writeBufOff
+		othCtr := 0
+		readShift := rs
+		for {
+			if readShift <= 0 {
+				input |= uint64(bin.ReadUInt32BE(b2, readBufOff)) << uint(32-readShift)
+				readShift += 32
+				readBufOff += 4
+			}
+			rs = readShift - 1
+			outVal := 'C'
+			tmp := input & 0x8000000000000000
+			flag := 0
+			if tmp != 0 {
+				flag = 1
+			}
+			input *= 2
+			if 0 != flag {
+				if readShift <= 2 {
+					input |= uint64(bin.ReadUInt32BE(b2, readBufOff)) << uint(33-readShift)
+					readBufOff += 4
+					rs = readShift + 31
+				}
+				code = input >> 62
+				rs -= 2
+				input *= 4
+				if 0 == uint32(code) {
+					break
+				}
+				if uint32(code) == 3 {
+					writeBufOff += othCtr + 1
+					bufCLERS[wboTmp+othCtr] = 'E'
+					if updown > 0 {
+						updown--
+						if writeBufOff < int(res9) {
+							continue BIG_LOOP
+						}
+						break BIG_LOOP
+					}
+					bmcTmp = bufMetaCtr + 1
+					if writeBufOff < int(res9) {
+						if bmcTmp >= int(b5unkn32) {
+							bufCLERS[wboTmp+1+othCtr] = 'P'
+							writeBufOff = wboTmp + othCtr + 2
+						} else {
+							bufMeta[bufMetaCtr+1] = writeBufOff
+						}
+					}
+					if writeBufOff >= int(res9) {
+						bufMetaCtr++
+						break BIG_LOOP
+					}
+					bufMetaCtr = bmcTmp
+					continue BIG_LOOP
+				}
+				outVal = 'L'
+				if uint32(code) == 1 {
+					outVal = 'R'
+				}
+			}
+			bufCLERS[writeBufOff+othCtr] = byte(outVal)
+			othCtr++
+			triCtr += 3
+			readShift = rs
+			if othCtr+writeBufOff >= int(res9) {
+				writeBufOff += othCtr
+				break BIG_LOOP
+			}
+		}
+		bufCLERS[writeBufOff+othCtr] = 'S'
+
+		idx := triCtr + 2 - align3(triCtr+2) + align3(triCtr)
+
+		if buf_res9vmul3mul4_a[idx] == -1 {
+			updown++
+		}
+		writeBufOff += othCtr + 1
+
+		if writeBufOff < int(res9) {
+			continue
+		}
+		break
+	}
+
+	return bufMeta, bufCLERS
+}
+
+func align3(input int) int {
+	return 3 * (input / 3)
 }
 
 func read10MeshBufs(data []byte, dataOffset int, ebta ebTable, ebtb ebTable) (bufs [10][]byte) {

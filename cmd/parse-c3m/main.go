@@ -3,13 +3,13 @@ package main
 import (
 	"flyover-reverse-engineering/pkg/bin"
 	"flyover-reverse-engineering/pkg/dec/huffman"
+	"flyover-reverse-engineering/pkg/dec/mesh"
 	"flyover-reverse-engineering/pkg/mth"
 	"flyover-reverse-engineering/pkg/oth"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"time"
 )
 
 var l = log.New(os.Stderr, "", 0)
@@ -29,8 +29,6 @@ func main() {
 	file := os.Args[1]
 	data, err := ioutil.ReadFile(file)
 	oth.CheckPanic(err)
-
-	l.Printf("%v\n\n", time.Now())
 
 	l.Printf("File size: %d bytes\n", len(data))
 	if len(data) < 4 || data[0] != 'C' || data[1] != '3' || data[2] != 'M' {
@@ -114,7 +112,7 @@ func parseHeader(data []byte, offset *int) {
 	l.Printf("                               % f,% f,% f,% f,\n", m[6], m[7], m[8], z)
 	l.Printf("                               % f,% f,% f,% f ]\n", 0.0, 0.0, 0.0, 1.0)
 
-	l.Printf("Scale: ?")
+	l.Printf("Scale: vtx?")
 
 	*offset += 113
 }
@@ -173,7 +171,6 @@ func parseMaterial(data []byte, offset *int) {
 }
 
 func parseMesh(data []byte, offset *int) {
-	//l.Printf("Not implemented, can't skip yet")
 	*offset += 5
 	numberOfItems := int(bin.ReadInt32(data, *offset+0))
 	l.Printf("Number of meshes: %d \n", numberOfItems)
@@ -200,114 +197,104 @@ func parseMesh(data []byte, offset *int) {
 			l.Printf("unknown_a_8: %d \n", unknownA8)
 
 			hpa := huffman.ReadParams(data, offset3+1)
-			l.Printf("huffman_params_a: %v\n", hpa)
 			ebta := huffman.CreateTable(hpa)
-			l.Printf("-> eb_table_a (%d)", ebta.Length())
+			l.Printf("huffman_params_a: %v -> eb_table_a (%d)\n", hpa, ebta.Length())
 
 			hpb := huffman.ReadParams(data, offset3+15)
-			l.Printf("huffman_params_b: %v\n", hpb)
 			ebtb := huffman.CreateTable(hpb)
-			l.Printf("-> eb_table_b (%d)", ebtb.Length())
+			l.Printf("huffman_params_b: %v -> eb_table_b (%d)\n", hpb, ebtb.Length())
 
-			l.Printf("unknown_j_128_32_0: %d \n", bin.ReadInt32(data, offset3+29+0))
-			l.Printf("unknown_j_128_32_1: %d \n", bin.ReadInt32(data, offset3+29+4))
-			l.Printf("  multiplied by 3 sometimes (and then by 32 for buffer)")
-			l.Printf("unknown_j_128_32_2: %d \n", bin.ReadInt32(data, offset3+29+8))
-			l.Printf("  multiplied by 4 sometimes")
+			gUvCount := bin.ReadInt32(data, offset3+29+0)
+			gFacesCount := bin.ReadInt32(data, offset3+29+4)
+			groupCount := bin.ReadInt32(data, offset3+29+8)
+			l.Printf("tex coords: %d (unknown_j_128_32_0)\n", gUvCount)
+			l.Printf("faces: %d (unknown_j_128_32_1)\n", gFacesCount)
+			l.Printf("groups: %d (unknown_j_128_32_2)\n", groupCount)
 			dataOffset := int(bin.ReadInt32(data, offset3+29+12))
 			l.Printf("dataOffset: %d (unknown_j_128_32_3) -> *\n", dataOffset)
 			l.Printf("unknown_k_32: %d \n", bin.ReadUInt32(data, offset3+45))
 
 			l.Println()
 
-			if bin.ReadInt32(data, offset3+29+8) == 0 && unknownA8 == 6 {
+			if groupCount == 0 && unknownA8 == 6 {
 				panic("??? 1")
 			}
 			if unknownA8 == 8 {
 				panic("??? 2")
 			}
 
-			bufs := read10MeshBufs(data, dataOffset, ebta, ebtb)
-
-			l.Printf("buf 0:")
-			b0 := bufs[0]
-			i32_0 := bin.ReadInt32(b0, 0)
-			f64_0 := bin.ReadFloat64(b0, 4)
-			f64_1 := bin.ReadFloat64(b0, 12)
-			f64_2 := bin.ReadFloat64(b0, 20)
-			f32_0 := bin.ReadFloat32(b0, 28)
-			f32_1 := bin.ReadFloat32(b0, 32)
-			f32_2 := bin.ReadFloat32(b0, 36)
-			i8_0 := bin.ReadUInt8(b0, 40)
-			res3 := bin.ReadInt32(b0, 41)
-			i32_1 := bin.ReadInt32(b0, 45)
-			i32_2 := bin.ReadInt32(b0, 49)
-			i8_1 := bin.ReadUInt8(b0, 53)
-			i32_3 := bin.ReadInt32(b0, 54)
-			i32_4 := bin.ReadUInt32(b0, 58)
-
-			l.Printf("  i32_0:    %d", i32_0)
-			l.Printf("  f64_0-2:  %f %f %f", f64_0, f64_1, f64_2)
-			l.Printf("  f32_0-2:  %f %f %f", f32_0, f32_1, f32_2)
-			l.Printf("  i8_0:     %d", i8_0)
-			l.Printf("  res3:     %d", res3)
-			l.Printf("  i32_1:    %d", i32_1)
-			l.Printf("  i32_2:    %d", i32_2)
-			l.Printf("  i8_1:     %d", i8_1)
-			l.Printf("  i32_3:    %d", i32_3)
-			l.Printf("  i32_4:    %d", i32_4)
-
-			if i32_0 < 0 || 0 == i8_0 || (i32_1|i32_2) < 0 || 0 == i8_1 || (i32_4&0x80000000) != 0 {
-				panic("incorrect values in buf 0")
+			mesh.SetLogPrefix(l.Prefix() + "  ")
+			l.Println("Decompressing")
+			rmd := mesh.Decompress(data, dataOffset, ebta, ebtb)
+			if rmd.UVCount != gUvCount || rmd.FacesCount != gFacesCount {
+				panic("decompressed mesh counts != header counts")
 			}
 
-			l.Printf("buf 5:")
-			b5 := bufs[5]
-			res9 := bin.ReadInt32(b5, 0)
-			l.Printf("  res9: %d", res9)
-			if res9 < 0 {
-				panic("incorrect values in buf 5 #1")
-			}
-			i32_0min32 := i32_0 - 32
-			fst := i32_0min32
-			snd := 32
-			buf_res9vmul3mul4_a := make([]int32, res9*3)
-			for i := 0; i < len(buf_res9vmul3mul4_a); i++ {
-				buf_res9vmul3mul4_a[i] = -1 // 0xffffffff
-			}
-			if i32_0min32 >= 128 {
-				for {
-					val_in_data5_a := bin.ReadInt32(b5, snd/8)
-					val_in_data5_b := bin.ReadInt32(b5, snd/8+4)
-					if val_in_data5_a >= 0 {
-						buf_res9vmul3mul4_a[val_in_data5_a] = val_in_data5_b
-					}
-					if val_in_data5_b >= 0 {
-						buf_res9vmul3mul4_a[val_in_data5_b] = val_in_data5_a
-					}
+			l.Println("Vertices:", len(rmd.Vertices)/3, "| Faces:", len(rmd.Faces)/3, "| UV:", len(rmd.UV)/2)
 
-					fst -= 64
-					snd += 64
+			tmpBufFst := make([]int32, rmd.UVCount)
+			for ctr := 0; ctr < 3*int(rmd.FacesCount); ctr++ {
+				tmpBufFst[rmd.Res5[ctr]] = rmd.Faces[ctr]
+			}
+			tmpBufSnd := make([]int32, rmd.UVCount)
 
-					if !(fst > 127) {
-						break
+			preIdx := 0
+			off := 0
+			uvCount1 := int(rmd.UVCount)
+			uvCount2 := int(rmd.UVCount)
+			vertices := make([]vertex, uvCount2)
+
+			for {
+				tmpBufFstItm := tmpBufFst[off]
+				uvCountMin1 := uvCount1 - 1
+				if 0 != rmd.Res8[tmpBufFstItm] {
+					uvCount1 = uvCountMin1
+				} else {
+					uvCountMin1 = preIdx
+					preIdx++
+				}
+				tmpBufSnd[off] = int32(uvCountMin1)
+				idx := uvCountMin1
+				vertices[idx].x = rmd.Vertices[3*tmpBufFstItm+0]
+				vertices[idx].y = rmd.Vertices[3*tmpBufFstItm+1]
+				vertices[idx].z = rmd.Vertices[3*tmpBufFstItm+2]
+				vertices[idx].u = rmd.UV[off*2+0]
+				vertices[idx].v = rmd.UV[off*2+1]
+
+				off++
+				uvCount2--
+				if uvCount2 == 0 {
+					break
+				}
+			}
+
+			for ctr := 0; ctr < 3*int(rmd.FacesCount); ctr++ {
+				rmd.Res5[ctr] = tmpBufSnd[rmd.Res5[ctr]]
+			}
+
+			g := make([]int, groupCount)
+			for i := 0; i < int(groupCount); i++ {
+				for j := 0; j < len(rmd.Res6); j++ {
+					if int(rmd.Res6[j]) == i {
+						g[i]++
 					}
 				}
 			}
-			l.Printf("  buf_res9vmul3mul4_a len: %d", len(buf_res9vmul3mul4_a))
+			l.Println("Grouped face counts:", g)
 
-			res1 := bin.ReadInt32(b5, snd/8)
-			l.Printf("  res1: %d", res1)
-			b5unkn32 := bin.ReadInt32(b5, snd/8+4)
-			l.Printf("  b5unkn32: %d", b5unkn32)
-
-			if (res1 | b5unkn32) < 0 {
-				panic("incorrect values in buf 5 #2")
+			groups := make([]group, groupCount)
+			for i := 0; i < int(groupCount); i++ {
+				groups[i].faces = make([]face, g[i])
+				k := 0
+				for j := 0; j < len(rmd.Res6); j++ {
+					if int(rmd.Res6[j]) == i {
+						a, b, c := rmd.Res5[j*3], rmd.Res5[j*3+1], rmd.Res5[j*3+2]
+						face := &groups[i].faces[k]
+						face.a, face.b, face.c = a, b, c
+						k++
+					}
+				}
 			}
-
-			l.Println("buf 2:")
-			_, bufCLERS := decodeCLERS(bufs[2], res9, b5unkn32, buf_res9vmul3mul4_a)
-			l.Printf("  CLERS: %s", oth.AbbrStr(fmt.Sprintf("%s", bufCLERS), 48))
 
 			// can't skip yet
 			os.Exit(0)
@@ -323,155 +310,14 @@ func parseMesh(data []byte, offset *int) {
 	os.Exit(0)
 }
 
-func decodeCLERS(b2 []byte, res9 int32, b5unkn32 int32, buf_res9vmul3mul4_a []int32) ([]int, []byte) {
-
-	bufMeta := make([]int, res9)
-	bufCLERS := make([]byte, res9*3)
-	writeBufOff := 0
-	if b5unkn32 == 0 {
-		writeBufOff = 0
-		if res9 > 0 {
-			writeBufOff = 1
-			bufCLERS[0] = 'P'
-		}
-	}
-
-	if writeBufOff >= int(res9) {
-		panic("not implemented: no decoding of data2")
-	}
-	var input uint64
-	rs := 0
-	bmcTmp := 0
-	updown := 0
-	var code uint64
-	readBufOff := 0
-	bufMetaCtr := bmcTmp
-
-BIG_LOOP:
-	for {
-		triCtr := 3 * writeBufOff
-		wboTmp := writeBufOff
-		othCtr := 0
-		readShift := rs
-		for {
-			if readShift <= 0 {
-				input |= uint64(bin.ReadUInt32BE(b2, readBufOff)) << uint(32-readShift)
-				readShift += 32
-				readBufOff += 4
-			}
-			rs = readShift - 1
-			outVal := 'C'
-			tmp := input & 0x8000000000000000
-			flag := 0
-			if tmp != 0 {
-				flag = 1
-			}
-			input *= 2
-			if 0 != flag {
-				if readShift <= 2 {
-					input |= uint64(bin.ReadUInt32BE(b2, readBufOff)) << uint(33-readShift)
-					readBufOff += 4
-					rs = readShift + 31
-				}
-				code = input >> 62
-				rs -= 2
-				input *= 4
-				if 0 == uint32(code) {
-					break
-				}
-				if uint32(code) == 3 {
-					writeBufOff += othCtr + 1
-					bufCLERS[wboTmp+othCtr] = 'E'
-					if updown > 0 {
-						updown--
-						if writeBufOff < int(res9) {
-							continue BIG_LOOP
-						}
-						break BIG_LOOP
-					}
-					bmcTmp = bufMetaCtr + 1
-					if writeBufOff < int(res9) {
-						if bmcTmp >= int(b5unkn32) {
-							bufCLERS[wboTmp+1+othCtr] = 'P'
-							writeBufOff = wboTmp + othCtr + 2
-						} else {
-							bufMeta[bufMetaCtr+1] = writeBufOff
-						}
-					}
-					if writeBufOff >= int(res9) {
-						bufMetaCtr++
-						break BIG_LOOP
-					}
-					bufMetaCtr = bmcTmp
-					continue BIG_LOOP
-				}
-				outVal = 'L'
-				if uint32(code) == 1 {
-					outVal = 'R'
-				}
-			}
-			bufCLERS[writeBufOff+othCtr] = byte(outVal)
-			othCtr++
-			triCtr += 3
-			readShift = rs
-			if othCtr+writeBufOff >= int(res9) {
-				writeBufOff += othCtr
-				break BIG_LOOP
-			}
-		}
-		bufCLERS[writeBufOff+othCtr] = 'S'
-
-		idx := triCtr + 2 - align3(triCtr+2) + align3(triCtr)
-
-		if buf_res9vmul3mul4_a[idx] == -1 {
-			updown++
-		}
-		writeBufOff += othCtr + 1
-
-		if writeBufOff < int(res9) {
-			continue
-		}
-		break
-	}
-
-	return bufMeta, bufCLERS
+type vertex struct {
+	x, y, z, u, v float32
 }
 
-func align3(input int) int {
-	return 3 * (input / 3)
+type group struct {
+	faces []face
 }
 
-func read10MeshBufs(data []byte, dataOffset int, ebta huffman.Table, ebtb huffman.Table) (bufs [10][]byte) {
-	l.Println("* buf  type  len1   len2   data")
-	off := 120
-	for i := 0; i < 10; i++ {
-		len1 := int(bin.ReadUInt32(data, dataOffset+12*i))
-		len2 := int(bin.ReadUInt32(data, dataOffset+12*i+4))
-		val := bin.ReadUInt32(data, dataOffset+12*i+8)
-
-		outBuf := make([]byte, len1+3)
-		switch val {
-		case 0:
-			buf := data[dataOffset+off : dataOffset+off+int(len2)]
-			l.Printf("  %d    0     %-5d  %-5d  %s", i, len1, len2, oth.AbbrHexStr(buf, 32))
-			copy(outBuf, buf)
-		case 3:
-			buf := data[dataOffset+off : dataOffset+off+int(len2)]
-			l.Printf("  %d    3     %-5d  %-5d  %s", i, len1, len2, oth.AbbrHexStr(buf, 32))
-			hp, s := ebta, "a"
-			if i == 7 {
-				hp, s = ebtb, "b"
-			}
-			huffman.DecodeUsingTable(buf, len1, len2, hp, &outBuf)
-			l.Printf("  -> decoded (eb_table_%s): %s", s, oth.AbbrHexStr(outBuf, 32))
-		case 1:
-			panic("Unsupported type: 1")
-		default:
-			panic(fmt.Sprintf("Unknown type: %d", val))
-		}
-		bufs[i] = outBuf
-
-		off += len2
-	}
-	return
+type face struct {
+	a, b, c int32
 }

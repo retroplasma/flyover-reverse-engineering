@@ -36,7 +36,8 @@ go run cmd/auth/main.go [url] [session_id] [token_1] [token_2]
 - `token_1`: see GeoServices binary (function: GEOURLAuthenticationGenerateURL)
 - `token_2`: see Geo Resource Manifest config (protobuf field 30)
 
-#### Parse C3M file (WIP)
+#### Parse C3M file
+This parses a C3M v3 file. It decompresses meshes, reads JPEG textures and produces a struct that contains a textured 3d model:
 ```
 go run cmd/parse-c3m/main.go [file]
 ```

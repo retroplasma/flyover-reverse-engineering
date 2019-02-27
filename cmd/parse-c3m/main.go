@@ -57,11 +57,10 @@ func parseC3Mv3(data []byte) {
 
 	numberOfItems := int(data[5])
 	l.Printf("Number of items: %d\n", numberOfItems)
-	processedItems := 0
 	offset := 6
 
 	pfx := l.Prefix()
-	for {
+	for processedItems := 0; processedItems < numberOfItems; processedItems++ {
 		l.SetPrefix(pfx)
 		switch data[offset] {
 		case 0:
@@ -84,13 +83,9 @@ func parseC3Mv3(data []byte) {
 		default:
 			panic("Invalid item type")
 		}
-
-		if processedItems+1 >= numberOfItems {
-			l.Println("All items processed")
-			return
-		}
-		processedItems++
 	}
+	l.SetPrefix(pfx)
+	l.Println("All items processed")
 }
 
 func parseHeader(data []byte, offset *int) {
@@ -180,10 +175,12 @@ func parseMesh(data []byte, offset *int) {
 	pfx := l.Prefix()
 	l.SetPrefix(l.Prefix() + "  ")
 
-	for {
+	var vtxCount int32
+	for currentItem := 0; currentItem < numberOfItems; currentItem++ {
 		l.SetPrefix(pfx)
 		meshType := bin.ReadInt8(data, *offset+0)
-		l.Printf("unknown_1_2: %d + %d<<8 = %d", bin.ReadInt8(data, *offset+1), bin.ReadInt8(data, *offset+2), int(bin.ReadInt8(data, *offset+1))+int(bin.ReadInt8(data, *offset+2))<<8)
+		unknown_1_2 := int(bin.ReadInt8(data, *offset+1)) + int(bin.ReadInt8(data, *offset+2))<<8
+		l.Printf("unknown_1_2: %d + %d<<8 = %d", bin.ReadInt8(data, *offset+1), bin.ReadInt8(data, *offset+2), unknown_1_2)
 		l.Println()
 
 		switch meshType {
@@ -272,42 +269,35 @@ func parseMesh(data []byte, offset *int) {
 				rmd.Res5[ctr] = tmpBufSnd[rmd.Res5[ctr]]
 			}
 
-			g := make([]int, groupCount)
-			for i := 0; i < int(groupCount); i++ {
-				for j := 0; j < len(rmd.Res6); j++ {
-					if int(rmd.Res6[j]) == i {
-						g[i]++
+			gm := make(map[int]int)
+			for i := 0; i < len(rmd.Res6); i++ {
+				gm[int(rmd.Res6[i])]++
+			}
+			l.Println("Groups:", gm)
+
+			groups := make(map[int]group)
+			for i := 0; i < len(rmd.Res6); i++ {
+				e := int(rmd.Res6[i])
+				if gm[e] > 0 {
+					group := groups[e]
+					if group.faces == nil {
+						group.material = e
+						group.faces = make([]face, gm[e])
+						groups[e] = group
 					}
+					face := &group.faces[len(group.faces)-gm[e]]
+					face.a, face.b, face.c = rmd.Res5[i*3], rmd.Res5[i*3+1], rmd.Res5[i*3+2]
+					gm[e]--
 				}
 			}
-			l.Println("Grouped face counts:", g)
 
-			groups := make([]group, groupCount)
-			for i := 0; i < int(groupCount); i++ {
-				groups[i].faces = make([]face, g[i])
-				k := 0
-				for j := 0; j < len(rmd.Res6); j++ {
-					if int(rmd.Res6[j]) == i {
-						a, b, c := rmd.Res5[j*3], rmd.Res5[j*3+1], rmd.Res5[j*3+2]
-						face := &groups[i].faces[k]
-						face.a, face.b, face.c = a, b, c
-						k++
-					}
-				}
-			}
+			vtxCount += int32(len(vertices))
 
-			// can't skip yet
-			os.Exit(0)
-
+			*offset += unknown_1_2
 		default:
 			panic(fmt.Sprintf("Unsupported meshType %d", meshType))
 		}
-
-		break
 	}
-
-	// can't skip yet
-	os.Exit(0)
 }
 
 type vertex struct {
@@ -315,7 +305,8 @@ type vertex struct {
 }
 
 type group struct {
-	faces []face
+	material int
+	faces    []face
 }
 
 type face struct {

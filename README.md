@@ -10,7 +10,7 @@ Noticed differences between Google Earth and Apple Flyover during [previous proj
 |<img src="https://user-images.githubusercontent.com/46618410/52183147-db89e500-27fc-11e9-9c75-fc78ff6cda58.jpg" alt="Google" title="Google"  width=100%>|<img src="https://user-images.githubusercontent.com/46618410/52183145-d62c9a80-27fc-11e9-9396-2d0acb34ec03.jpg" alt="Apple" title="Apple" width=100%>|
 
 #### General
-Data in stored in map tiles:
+Data in stored in map tiles. These four tile styles are used for flyover:
 
 |Type  | Purpose                                     | URL structure                                        |
 |------|---------------------------------------------|------------------------------------------------------|
@@ -26,7 +26,7 @@ Data in stored in map tiles:
 - ❹❺❻: Map tile. Regular scheme?
 - ❼: Height/altitude? Only for C3M and C3MM
 
-
+Focusing on C3M(M) for now. DTMs are just images with a footer; they're probably used for the [grid](https://user-images.githubusercontent.com/46618410/53483243-fdcbf700-3a78-11e9-8fc0-ad6cfa8c57cd.png) that is displayed when Maps is loading.
 
 #### Authenticate URLs
 ```

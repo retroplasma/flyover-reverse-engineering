@@ -1,8 +1,15 @@
 syntax = "proto3";
+package pro;
 
 message ResourceManifest {
 	repeated StyleConfig style_config = 2;
 	string token_p2 = 30;
+	string cache_base_url = 31;
+	repeated CacheFile cache_file = 72;
+
+	message CacheFile {
+		string file_name = 2;
+	}
 
 	message StyleConfig {
 		string url_prefix_1 = 1;

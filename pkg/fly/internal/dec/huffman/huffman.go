@@ -2,12 +2,26 @@ package huffman
 
 import (
 	"bytes"
-	"flyover-reverse-engineering/pkg/bin"
+	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/flyover-reverse-engineering/pkg/bin"
 )
 
 var l = log.New(os.Stderr, "", 0)
+var enableLogs = true
+
+func SetLogPrefix(s string) {
+	l.SetPrefix(s)
+}
+
+func init() {
+	if !enableLogs {
+		l.SetFlags(0)
+		l.SetOutput(ioutil.Discard)
+	}
+}
 
 func DecodeUsingTable(data []byte, len1 int, len2 int, table Table, writeBuf *[]byte) {
 	readBuf := make([]byte, len2+3)

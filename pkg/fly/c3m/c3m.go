@@ -1,14 +1,15 @@
-package fly
+package c3m
 
 import (
-	"flyover-reverse-engineering/pkg/bin"
-	"flyover-reverse-engineering/pkg/dec/huffman"
-	"flyover-reverse-engineering/pkg/dec/mesh"
-	"flyover-reverse-engineering/pkg/mth"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/flyover-reverse-engineering/pkg/bin"
+	"github.com/flyover-reverse-engineering/pkg/fly/internal/dec/huffman"
+	"github.com/flyover-reverse-engineering/pkg/fly/internal/dec/mesh"
+	"github.com/flyover-reverse-engineering/pkg/mth"
 )
 
 var l = log.New(os.Stderr, "", 0)
@@ -21,7 +22,7 @@ func init() {
 	}
 }
 
-func ParseC3M(data []byte) (c3m C3M) {
+func Parse(data []byte) (c3m C3M) {
 	if len(data) < 4 || data[0] != 'C' || data[1] != '3' || data[2] != 'M' {
 		panic("Invalid C3M header")
 	}
@@ -68,7 +69,7 @@ func parseC3Mv3(data []byte) C3M {
 		case 2:
 			l.Printf("Mesh at 0x%x (%d)", offset, offset)
 			l.SetPrefix(l.Prefix() + "  ")
-			c3m.Objects = parseMesh(data, &offset)
+			c3m.Meshes = parseMesh(data, &offset)
 		case 3:
 			l.Printf("Scene Graph? / Animation? at 0x%x (%d)", offset, offset)
 			l.SetPrefix(l.Prefix() + "  ")
@@ -155,7 +156,7 @@ func parseMaterial(data []byte, offset *int) []Material {
 	return materials
 }
 
-func parseMesh(data []byte, offset *int) []Object {
+func parseMesh(data []byte, offset *int) []Mesh {
 	*offset += 5
 	numberOfItems := int(bin.ReadInt32(data, *offset+0))
 	l.Printf("Number of meshes: %d \n", numberOfItems)
@@ -164,7 +165,7 @@ func parseMesh(data []byte, offset *int) []Object {
 	pfx := l.Prefix()
 	l.SetPrefix(l.Prefix() + "  ")
 
-	objects := make([]Object, numberOfItems)
+	meshes := make([]Mesh, numberOfItems)
 
 	for currentItem := 0; currentItem < numberOfItems; currentItem++ {
 		l.SetPrefix(pfx)
@@ -281,21 +282,21 @@ func parseMesh(data []byte, offset *int) []Object {
 				}
 			}
 
-			objects[currentItem].Groups = groups
-			objects[currentItem].Vertices = vertices
+			meshes[currentItem].Groups = groups
+			meshes[currentItem].Vertices = vertices
 
 			*offset += unknown_1_2
 		default:
 			panic(fmt.Sprintf("Unsupported meshType %d", meshType))
 		}
 	}
-	return objects
+	return meshes
 }
 
 type C3M struct {
 	Header    Header
 	Materials []Material
-	Objects   []Object
+	Meshes    []Mesh
 }
 
 type Header struct {
@@ -307,7 +308,7 @@ type Material struct {
 	JPEG []byte
 }
 
-type Object struct {
+type Mesh struct {
 	Vertices []Vertex
 	Groups   map[int]Group
 }

@@ -1,13 +1,14 @@
 package mesh
 
 import (
-	"flyover-reverse-engineering/pkg/bin"
-	"flyover-reverse-engineering/pkg/dec/huffman"
-	"flyover-reverse-engineering/pkg/oth"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/flyover-reverse-engineering/pkg/bin"
+	"github.com/flyover-reverse-engineering/pkg/fly/internal/dec/huffman"
+	"github.com/flyover-reverse-engineering/pkg/oth"
 )
 
 var l = log.New(os.Stderr, "", 0)

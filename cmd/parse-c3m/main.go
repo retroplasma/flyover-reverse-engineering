@@ -1,18 +1,18 @@
 package main
 
 import (
-	"flyover-reverse-engineering/pkg/fly"
-	"flyover-reverse-engineering/pkg/oth"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/flyover-reverse-engineering/pkg/fly/c3m"
+	"github.com/flyover-reverse-engineering/pkg/oth"
 )
 
 var l = log.New(os.Stderr, "", 0)
 
 func main() {
-
 	if len(os.Args) < 2 {
 		fmt.Fprintf(os.Stderr, "usage: %s [c3m_file]\n", os.Args[0])
 		os.Exit(1)
@@ -22,6 +22,6 @@ func main() {
 	data, err := ioutil.ReadFile(file)
 	oth.CheckPanic(err)
 	l.Printf("File size: %d bytes\n", len(data))
-	c3m := fly.ParseC3M(data)
+	c3m := c3m.Parse(data)
 	_ = c3m
 }

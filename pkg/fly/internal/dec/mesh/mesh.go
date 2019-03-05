@@ -830,7 +830,7 @@ func read10MeshBufs(data []byte, dataOffset int, ebta huffman.Table, ebtb huffma
 	for i := 0; i < 10; i++ {
 		len1 := int(bin.ReadUInt32(data, dataOffset+12*i))
 		len2 := int(bin.ReadUInt32(data, dataOffset+12*i+4))
-		val := bin.ReadUInt32(data, dataOffset+12*i+8)
+		val := bin.ReadUInt8(data, dataOffset+12*i+8)
 
 		desc := "?"
 		switch i {

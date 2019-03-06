@@ -18,10 +18,11 @@ message ResourceManifest {
 
 		enum StyleID {
 			_ = 0;
+			C3MM_1 = 14;
 			C3M = 15;
 			DTM_1 = 16;
 			DTM_2 = 17;
-			C3MM = 52;
+			C3MM_2 = 52;
 		}
 	}	
 }

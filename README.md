@@ -32,8 +32,8 @@ Focusing on C3M(M) for now. DTMs are just images with a footer; they're probably
 
 #### Code
 Pull this repository including submodules and install [Go](https://golang.org/). Then edit `config.json`:
-- `resourceManifestURL`: see `com.apple.GEO.plist` or `GeoServices` binary
-- `tokenP1`: see `GeoServices` binary (function: `GEOURLAuthenticationGenerateURL`)
+- `resourceManifestURL`: see [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
+- `tokenP1`: see [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
 
 #### Authenticate URLs
 This authenticates a URL using parameters from `config.json`:

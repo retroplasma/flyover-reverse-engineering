@@ -30,16 +30,19 @@ Data in stored in map tiles. These five tile styles are used for flyover:
 
 Focusing on C3M(M) for now. DTMs are just images with a footer; they're probably used for the [grid](https://user-images.githubusercontent.com/46618410/53483243-fdcbf700-3a78-11e9-8fc0-ad6cfa8c57cd.png) that is displayed when Maps is loading.
 
+#### Code
+Pull this repository including submodules and install [Go](https://golang.org/). Then edit `config.json`:
+- `resourceManifestURL`: see `com.apple.GEO.plist` or `GeoServices` binary
+- `tokenP1`: see `GeoServices` binary (function: `GEOURLAuthenticationGenerateURL`)
+
 #### Authenticate URLs
+This authenticates a URL using parameters from `config.json`:
 ```
-go run cmd/auth/main.go [url] [session_id] [token_1] [token_2]
+go run cmd/auth/main.go [url]
 ```
-- `session_id`: 40 digits
-- `token_1`: see GeoServices binary (function: GEOURLAuthenticationGenerateURL)
-- `token_2`: see Geo Resource Manifest config (protobuf field 30)
 
 #### Parse C3M file
-This parses a C3M v3 file. It decompresses meshes, reads JPEG textures and produces a struct that contains a textured 3d model:
+This parses a C3M v3 file, decompresses meshes, reads JPEG textures and produces a struct that contains a textured 3d model:
 ```
 go run cmd/parse-c3m/main.go [file]
 ```

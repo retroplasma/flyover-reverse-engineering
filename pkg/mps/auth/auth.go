@@ -22,7 +22,7 @@ func AuthURL(urlStr string, sid string, tokenP1 string, tokenP2 string) (string,
 		return "", err
 	}
 
-	tokenP3 := genRandStr(16, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	tokenP3 := GenRandStr(16, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 	token := tokenP1 + tokenP2 + tokenP3
 	ts := time.Now().Unix() + 4200
 	path := urlObj.RequestURI()
@@ -47,13 +47,8 @@ func AuthURL(urlStr string, sid string, tokenP1 string, tokenP2 string) (string,
 	return final, nil
 }
 
-func hashStr(str string) []byte {
-	hash := sha256.New()
-	io.WriteString(hash, str)
-	return hash.Sum(nil)
-}
-
-func genRandStr(n int, chars string) string {
+// GenRandStr generates random string from chars with length n
+func GenRandStr(n int, chars string) string {
 	b := make([]byte, n)
 	for i := range b {
 		val, err := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
@@ -63,6 +58,12 @@ func genRandStr(n int, chars string) string {
 		b[i] = chars[val.Int64()]
 	}
 	return string(b)
+}
+
+func hashStr(str string) []byte {
+	hash := sha256.New()
+	io.WriteString(hash, str)
+	return hash.Sum(nil)
 }
 
 func padPkcs7(src []byte) []byte {

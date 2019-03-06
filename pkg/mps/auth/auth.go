@@ -1,4 +1,4 @@
-package mps
+package auth
 
 import (
 	"bytes"
@@ -15,6 +15,7 @@ import (
 	"time"
 )
 
+// AuthURL authenticates a URL using a session id and two tokens
 func AuthURL(urlStr string, sid string, tokenP1 string, tokenP2 string) (string, error) {
 	urlObj, err := url.ParseRequestURI(urlStr)
 	if err != nil {

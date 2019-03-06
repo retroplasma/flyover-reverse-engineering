@@ -1,10 +1,12 @@
 package c3m
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"runtime/debug"
 
 	"github.com/flyover-reverse-engineering/pkg/bin"
 	"github.com/flyover-reverse-engineering/pkg/fly/internal/dec/huffman"
@@ -22,7 +24,17 @@ func init() {
 	}
 }
 
-func Parse(data []byte) (c3m C3M) {
+func Parse(data []byte) (result C3M, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = errors.New(fmt.Sprintln(e, string(debug.Stack())))
+		}
+	}()
+	result = parse(data)
+	return
+}
+
+func parse(data []byte) (c3m C3M) {
 	if len(data) < 4 || data[0] != 'C' || data[1] != '3' || data[2] != 'M' {
 		panic("Invalid C3M header")
 	}
@@ -104,7 +116,7 @@ func parseHeader(data []byte, offset *int) Header {
 	l.Printf("                               % f,% f,% f,% f,\n", m[6], m[7], m[8], z)
 	l.Printf("                               % f,% f,% f,% f ]\n", 0.0, 0.0, 0.0, 1.0)
 
-	l.Printf("Scale: vtx?")
+	l.Printf("Scale: vtx")
 
 	*offset += 113
 

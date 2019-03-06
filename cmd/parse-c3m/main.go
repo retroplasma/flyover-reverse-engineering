@@ -22,6 +22,7 @@ func main() {
 	data, err := ioutil.ReadFile(file)
 	oth.CheckPanic(err)
 	l.Printf("File size: %d bytes\n", len(data))
-	c3m := c3m.Parse(data)
+	c3m, err := c3m.Parse(data)
+	oth.CheckPanic(err)
 	_ = c3m
 }

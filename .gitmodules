@@ -1,0 +1,6 @@
+[submodule "github.com/ulikunitz/xz"]
+	path = vendor/github.com/ulikunitz/xz
+	url = git@github.com:ulikunitz/xz
+[submodule "github.com/golang/protobuf"]
+	path = vendor/github.com/golang/protobuf
+	url = git@github.com:golang/protobuf

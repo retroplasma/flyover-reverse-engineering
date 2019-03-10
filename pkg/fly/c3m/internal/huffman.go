@@ -1,29 +1,12 @@
-package huffman
+package internal
 
 import (
 	"bytes"
-	"io/ioutil"
-	"log"
-	"os"
 
 	"github.com/flyover-reverse-engineering/pkg/bin"
 )
 
-var l = log.New(os.Stderr, "", 0)
-var enableLogs = true
-
-func SetLogPrefix(s string) {
-	l.SetPrefix(s)
-}
-
-func init() {
-	if !enableLogs {
-		l.SetFlags(0)
-		l.SetOutput(ioutil.Discard)
-	}
-}
-
-func DecodeUsingTable(data []byte, len1 int, len2 int, table Table, writeBuf *[]byte) {
+func (table HuffmanTable) Decode(data []byte, len1 int, len2 int, writeBuf *[]byte) {
 	readBuf := make([]byte, len2+3)
 	copy(readBuf, data)
 	if len1 < 2 {
@@ -140,7 +123,7 @@ func dbgComp(a, b [][]byte) bool {
 	return true
 }
 
-func CreateTable(hp Params) Table {
+func (hp HuffmanParams) CreateTable() HuffmanTable {
 
 	type tree struct {
 		index     int16
@@ -287,26 +270,26 @@ func CreateTable(hp Params) Table {
 		}
 	}
 
-	return Table{buf6}
+	return HuffmanTable{buf6}
 }
 
-func ReadParams(data []byte, offset int) Params {
-	return Params{
+func ReadHuffmanParams(data []byte, offset int) HuffmanParams {
+	return HuffmanParams{
 		int(bin.ReadInt32(data, offset+0)),
 		int(bin.ReadInt32(data, offset+4)),
 		int(bin.ReadInt32(data, offset+8)),
 		int(bin.ReadInt16(data, offset+12))}
 }
 
-type Table struct {
+type HuffmanTable struct {
 	data [][]byte
 }
 
-func (hp Table) Length() int {
+func (hp HuffmanTable) Length() int {
 	return len(hp.data)
 }
 
-type Params struct {
+type HuffmanParams struct {
 	p0 int
 	p1 int
 	p2 int

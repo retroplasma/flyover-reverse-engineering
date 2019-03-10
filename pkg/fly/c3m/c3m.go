@@ -9,8 +9,7 @@ import (
 	"runtime/debug"
 
 	"github.com/flyover-reverse-engineering/pkg/bin"
-	"github.com/flyover-reverse-engineering/pkg/fly/internal/dec/huffman"
-	"github.com/flyover-reverse-engineering/pkg/fly/internal/dec/mesh"
+	"github.com/flyover-reverse-engineering/pkg/fly/c3m/internal"
 	"github.com/flyover-reverse-engineering/pkg/mth"
 )
 
@@ -196,12 +195,12 @@ func parseMesh(data []byte, offset *int) []Mesh {
 			unknownA8 := bin.ReadInt8(data, offset3+0)
 			l.Printf("unknown_a_8: %d \n", unknownA8)
 
-			hpa := huffman.ReadParams(data, offset3+1)
-			ebta := huffman.CreateTable(hpa)
+			hpa := internal.ReadHuffmanParams(data, offset3+1)
+			ebta := hpa.CreateTable()
 			l.Printf("huffman_params_a: %v -> eb_table_a (%d)\n", hpa, ebta.Length())
 
-			hpb := huffman.ReadParams(data, offset3+15)
-			ebtb := huffman.CreateTable(hpb)
+			hpb := internal.ReadHuffmanParams(data, offset3+15)
+			ebtb := hpb.CreateTable()
 			l.Printf("huffman_params_b: %v -> eb_table_b (%d)\n", hpb, ebtb.Length())
 
 			gUvCount := bin.ReadInt32(data, offset3+29+0)
@@ -223,9 +222,9 @@ func parseMesh(data []byte, offset *int) []Mesh {
 				panic("??? 2")
 			}
 
-			mesh.SetLogPrefix(l.Prefix() + "  ")
+			internal.SetLogPrefix(l.Prefix() + "  ")
 			l.Println("Decompressing")
-			rmd := mesh.Decompress(data, dataOffset, ebta, ebtb)
+			rmd := internal.Decompress(data, dataOffset, ebta, ebtb)
 			if rmd.UVCount != gUvCount || rmd.FacesCount != gFacesCount {
 				panic("decompressed mesh counts != header counts")
 			}

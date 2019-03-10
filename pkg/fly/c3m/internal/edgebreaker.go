@@ -1,4 +1,4 @@
-package mesh
+package internal
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/flyover-reverse-engineering/pkg/bin"
-	"github.com/flyover-reverse-engineering/pkg/fly/internal/dec/huffman"
 	"github.com/flyover-reverse-engineering/pkg/oth"
 )
 
@@ -38,7 +37,7 @@ type RawMeshData struct {
 	FacesCount    int32
 }
 
-func Decompress(data []byte, dataOffset int, ebta huffman.Table, ebtb huffman.Table) RawMeshData {
+func Decompress(data []byte, dataOffset int, ebta HuffmanTable, ebtb HuffmanTable) RawMeshData {
 	bufs := read10MeshBufs(data, dataOffset, ebta, ebtb)
 
 	l.Printf("buf 0:")
@@ -824,7 +823,7 @@ func align3(input int) int {
 	return 3 * (input / 3)
 }
 
-func read10MeshBufs(data []byte, dataOffset int, ebta huffman.Table, ebtb huffman.Table) (bufs [10][]byte) {
+func read10MeshBufs(data []byte, dataOffset int, ebta HuffmanTable, ebtb HuffmanTable) (bufs [10][]byte) {
 	l.Println("* buf  type  len1   len2   data                                 desc")
 	off := 120
 	for i := 0; i < 10; i++ {
@@ -859,7 +858,7 @@ func read10MeshBufs(data []byte, dataOffset int, ebta huffman.Table, ebtb huffma
 			if i == 7 {
 				hp, s = ebtb, "b"
 			}
-			huffman.DecodeUsingTable(buf, len1, len2, hp, &outBuf)
+			hp.Decode(buf, len1, len2, &outBuf)
 			l.Printf("  -> decoded (eb_table_%s): %s", s, oth.AbbrHexStr(outBuf, 32))
 		case 1:
 			panic("Unsupported type: 1")

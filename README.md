@@ -54,14 +54,11 @@ This repository is structured as follows:
 
 ##### Install
 Clone repo including submodules and install [Go](https://golang.org/). Then edit [config.json](config.json):
-
-Automatically on macOS:
-```
-./scripts/get_config_macos.sh > config.json
-```
-Or manually:
-- `resourceManifestURL`: from [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
-- `tokenP1`: from [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
+- automatically on macOS:
+  - `./scripts/get_config_macos.sh > config.json`
+- or manually:
+  - `resourceManifestURL`: from [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
+  - `tokenP1`: from [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
 
 ##### Command line programs
 Here are some independent command line programs that use code from [pkg](./pkg):

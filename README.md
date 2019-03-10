@@ -50,7 +50,7 @@ This repository is structured as follows:
 |[vendor](./vendor)  | dependencies                 |
 
 ##### Install
-Clone including submodules and install [Go](https://golang.org/). Then edit `config.json`:
+Clone including submodules and install [Go](https://golang.org/). Then edit [config.json](config.json):
 - `resourceManifestURL`: see [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
 - `tokenP1`: see [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
 

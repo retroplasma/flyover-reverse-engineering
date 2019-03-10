@@ -60,27 +60,30 @@ Or manually:
 - Find `resourceManifestURL` in [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
 - Find `tokenP1` in [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
 
-##### Authenticate URLs
+##### Command line programs
+Here are some independent command line programs that use code from [pkg](./pkg):
+
+###### Export OBJ (proof of concept, inefficient)
+This exports Santa Monica Pier to `./export`:
+```
+go run cmd/poc-export-obj/main.go
+```
+
+###### Authenticate URLs
 This authenticates a URL using parameters from `config.json`:
 ```
 go run cmd/auth/main.go [url]
 ```
 
-##### Parse C3M file
+###### Parse C3M file
 This parses a C3M v3 file, decompresses meshes, reads JPEG textures and produces a struct that contains a textured 3d model:
 ```
 go run cmd/parse-c3m/main.go [file]
 ```
 
-##### Parse C3MM file (work in progress)
+###### Parse C3MM file (work in progress)
 ```
 go run cmd/parse-c3mm/main.go [file]
-```
-
-##### Export OBJ (proof of concept, inefficient)
-This exports Santa Monica Pier to `./export`:
-```
-go run cmd/poc-export-obj/main.go
 ```
 
 #### Files on macOS

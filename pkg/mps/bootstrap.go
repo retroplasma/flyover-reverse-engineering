@@ -32,6 +32,7 @@ func Init(cache Cache, config config.Config) (ctx Context, err error) {
 	return
 }
 
+// getSession creates a new session or fetches it from cache
 func getSession(cache Cache) (s Session, err error) {
 	rawSidCachePath := path.Join(cache.Directory, "session.txt")
 	var rawSid []byte
@@ -60,6 +61,7 @@ func getSession(cache Cache) (s Session, err error) {
 	return
 }
 
+// getResourceManifest fetches resource manifest from cache or web and decodes it
 func getResourceManifest(cache Cache, config config.Config) (rm ResourceManifest, err error) {
 	rawRmCachePath := path.Join(cache.Directory, "ResourceManifest.pbd")
 	var rawRm []byte

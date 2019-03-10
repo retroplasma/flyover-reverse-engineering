@@ -47,6 +47,11 @@ This parses a C3M v3 file, decompresses meshes, reads JPEG textures and produces
 go run cmd/parse-c3m/main.go [file]
 ```
 
+#### Parse C3MM file (work in progress)
+```
+go run cmd/parse-c3mm/main.go [file]
+```
+
 #### Files on macOS
 - `~/Library/Preferences/com.apple.GEO.plist`
   - last resource manifest url

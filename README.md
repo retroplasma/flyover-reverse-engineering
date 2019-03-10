@@ -28,6 +28,14 @@ Data in stored in map tiles. These five tile styles are used for flyover:
 - ❻: Incremental part number
 - ❼❽: Size/scale. Not sure where its values come from
 
+#### Resource hierarchy
+```
+ResourceManifest
+└─ AltitudeManifest
+   ├─ C3MM
+   │  └─ C3M
+   └─ DTM?
+```
 Focusing on C3M(M) for now. DTMs are just images with a footer; they're probably used for the [grid](https://user-images.githubusercontent.com/46618410/53483243-fdcbf700-3a78-11e9-8fc0-ad6cfa8c57cd.png) that is displayed when Maps is loading.
 
 #### Code

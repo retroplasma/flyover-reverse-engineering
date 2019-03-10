@@ -11,17 +11,14 @@ import (
 )
 
 var l = log.New(os.Stderr, "", 0)
-var enableLogs = true
 
 func SetLogPrefix(s string) {
 	l.SetPrefix(s)
 }
 
-func init() {
-	if !enableLogs {
-		l.SetFlags(0)
-		l.SetOutput(ioutil.Discard)
-	}
+func DisableLogs() {
+	l.SetFlags(0)
+	l.SetOutput(ioutil.Discard)
 }
 
 type RawMeshData struct {

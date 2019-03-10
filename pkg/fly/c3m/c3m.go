@@ -14,13 +14,11 @@ import (
 )
 
 var l = log.New(os.Stderr, "", 0)
-var enableLogs = true
 
-func init() {
-	if !enableLogs {
-		l.SetFlags(0)
-		l.SetOutput(ioutil.Discard)
-	}
+func DisableLogs() {
+	l.SetFlags(0)
+	l.SetOutput(ioutil.Discard)
+	internal.DisableLogs()
 }
 
 func Parse(data []byte) (result C3M, err error) {

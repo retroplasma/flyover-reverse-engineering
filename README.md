@@ -52,6 +52,12 @@ go run cmd/parse-c3m/main.go [file]
 go run cmd/parse-c3mm/main.go [file]
 ```
 
+#### Export OBJ (proof of concept, inefficient)
+Exports Santa Monica Pier to `./export`
+```
+go run cmd/poc-export-obj/main.go
+```
+
 #### Files on macOS
 - `~/Library/Preferences/com.apple.GEO.plist`
   - last resource manifest url

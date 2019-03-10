@@ -46,13 +46,19 @@ This repository is structured as follows:
 |[cmd](./cmd)        | command line programs        |
 |[pkg](./pkg)        | most of the actual code      |
 |[proto](./proto)    | protobuf files               |
-|[scripts](./scripts)| additional scripts (node.js) |
+|[scripts](./scripts)| additional scripts           |
 |[vendor](./vendor)  | dependencies                 |
 
 ##### Install
 Clone including submodules and install [Go](https://golang.org/). Then edit [config.json](config.json):
-- `resourceManifestURL`: see [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
-- `tokenP1`: see [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
+
+Automatically on macOS:
+```
+./scripts/get_config_macos.sh > config.json
+```
+Or manually:
+- Find `resourceManifestURL` in [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
+- Find `tokenP1` in [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
 
 ##### Authenticate URLs
 This authenticates a URL using parameters from `config.json`:

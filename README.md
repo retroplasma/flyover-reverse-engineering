@@ -57,8 +57,8 @@ Automatically on macOS:
 ./scripts/get_config_macos.sh > config.json
 ```
 Or manually:
-- Find `resourceManifestURL` in [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
-- Find `tokenP1` in [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
+- `resourceManifestURL`: from [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
+- `tokenP1`: from [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
 
 ##### Command line programs
 Here are some independent command line programs that use code from [pkg](./pkg):

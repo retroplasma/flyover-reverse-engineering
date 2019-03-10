@@ -61,7 +61,7 @@ go run cmd/parse-c3mm/main.go [file]
 ```
 
 #### Export OBJ (proof of concept, inefficient)
-Exports Santa Monica Pier to `./export`
+This exports Santa Monica Pier to `./export`:
 ```
 go run cmd/poc-export-obj/main.go
 ```

@@ -53,7 +53,7 @@ This repository is structured as follows:
 |[vendor](./vendor)  | dependencies                 |
 
 ##### Install
-Clone including submodules and install [Go](https://golang.org/). Then edit [config.json](config.json):
+Clone repo including submodules and install [Go](https://golang.org/). Then edit [config.json](config.json):
 
 Automatically on macOS:
 ```

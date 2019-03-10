@@ -38,6 +38,9 @@ ResourceManifest
 ```
 Focusing on C3M(M) for now. DTMs are just images with a footer; they're probably used for the [grid](https://user-images.githubusercontent.com/46618410/53483243-fdcbf700-3a78-11e9-8fc0-ad6cfa8c57cd.png) that is displayed when Maps is loading.
 
+#### Status
+[Here](https://github.com/retroplasma/flyover-reverse-engineering/projects/1)
+
 #### Code
 This repository is structured as follows:
 

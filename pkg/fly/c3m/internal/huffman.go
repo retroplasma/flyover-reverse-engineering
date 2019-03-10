@@ -47,9 +47,8 @@ func (table HuffmanTable) Decode(data []byte, len1 int, len2 int, writeBuf *[]by
 			}
 			tblFstIdx = uint64(input2 >> uint(64-uint8(shiftTest)) << uint(16-shiftTest))
 		}
-		tblFstVal := int(tblFst[8*tblFstIdx+4])
+		tblFstVal := int(bin.ReadInt8(tblFst, 8*int(tblFstIdx)+4))
 		if tblFstVal <= 0 {
-			l.Println("not visited. check values when visited #2")
 			tblFstValNeg := -tblFstVal
 			tblIdx := bin.ReadInt32(tblFst, 8*int(tblFstIdx))
 			if readShift2 <= 15 {

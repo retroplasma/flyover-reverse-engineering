@@ -7,7 +7,6 @@ import (
 	"github.com/flyover-reverse-engineering/pkg/mps/config"
 
 	"github.com/flyover-reverse-engineering/pkg/mps"
-	"github.com/flyover-reverse-engineering/pkg/mps/bootstrap"
 )
 
 var cache = mps.Cache{Enabled: true, Directory: "./cache"}
@@ -23,7 +22,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error reading config file: %v\n", err)
 		os.Exit(1)
 	}
-	if config.ResourceManifestURL == "" || config.TokenP1 == "" {
+	if !config.IsValid() {
 		fmt.Fprintln(os.Stderr, "please set values in config.json")
 		os.Exit(1)
 	}
@@ -31,18 +30,12 @@ func main() {
 		fmt.Fprintf(os.Stderr, "error initializing cache: %v\n", err)
 		os.Exit(1)
 	}
-	session, err := bootstrap.GetSession(cache)
+	ctx, err := mps.Init(cache, config)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error getting session: %v\n", err)
+		fmt.Fprintf(os.Stderr, "error getting context: %v\n", err)
 		os.Exit(1)
 	}
-	rm, err := bootstrap.GetResourceManifest(cache, config)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error getting resource manifest: %v\n", err)
-		os.Exit(1)
-	}
-	authCtx := mps.AuthContext{Session: session, ResourceManifest: rm, TokenP1: mps.TokenP1(config.TokenP1)}
-	res, err := authCtx.AuthURL(os.Args[1])
+	res, err := ctx.AuthContext.AuthURL(os.Args[1])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error authenticating url: %v\n", err)
 		os.Exit(1)

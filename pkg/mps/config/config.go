@@ -20,3 +20,7 @@ func FromJSONFile(file string) (cnf Config, err error) {
 	}
 	return
 }
+
+func (config Config) IsValid() bool {
+	return config.ResourceManifestURL != "" && config.TokenP1 != ""
+}

@@ -1,4 +1,4 @@
-package bootstrap
+package mps
 
 import (
 	"io/ioutil"
@@ -6,16 +6,33 @@ import (
 	"path"
 	"time"
 
-	"github.com/flyover-reverse-engineering/pkg/mps"
 	"github.com/flyover-reverse-engineering/pkg/mps/auth"
 	"github.com/flyover-reverse-engineering/pkg/mps/config"
-	"github.com/flyover-reverse-engineering/pkg/mps/pro"
 	"github.com/flyover-reverse-engineering/pkg/web"
 	"github.com/golang/protobuf/proto"
 )
 
-// GetSession creates a new session or fetches it from cache
-func GetSession(cache mps.Cache) (s mps.Session, err error) {
+type Context struct {
+	AuthContext
+	ResourceManifest
+}
+
+// Init creates a context from cache or net
+func Init(cache Cache, config config.Config) (ctx Context, err error) {
+	rm, err := getResourceManifest(cache, config)
+	if err != nil {
+		return
+	}
+	s, err := getSession(cache)
+	if err != nil {
+		return
+	}
+	authCtx := AuthContext{s, rm, TokenP1(config.TokenP1)}
+	ctx = Context{authCtx, rm}
+	return
+}
+
+func getSession(cache Cache) (s Session, err error) {
 	rawSidCachePath := path.Join(cache.Directory, "session.txt")
 	var rawSid []byte
 	var info os.FileInfo
@@ -39,12 +56,11 @@ func GetSession(cache mps.Cache) (s mps.Session, err error) {
 	} else {
 		return
 	}
-	s = mps.Session{ID: string(rawSid)}
+	s = Session{ID: string(rawSid)}
 	return
 }
 
-// GetResourceManifest fetches resource manifest from cache or web and decodes it
-func GetResourceManifest(cache mps.Cache, config config.Config) (rm pro.ResourceManifest, err error) {
+func getResourceManifest(cache Cache, config config.Config) (rm ResourceManifest, err error) {
 	rawRmCachePath := path.Join(cache.Directory, "ResourceManifest.pbd")
 	var rawRm []byte
 	var info os.FileInfo
@@ -72,7 +88,7 @@ func GetResourceManifest(cache mps.Cache, config config.Config) (rm pro.Resource
 	}
 
 	// decode resource manifest
-	rm = pro.ResourceManifest{}
+	rm = ResourceManifest{}
 	if err = proto.Unmarshal(rawRm, &rm); err != nil {
 		return
 	}

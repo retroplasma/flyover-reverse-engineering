@@ -2,7 +2,6 @@ package mps
 
 import (
 	"github.com/flyover-reverse-engineering/pkg/mps/auth"
-	"github.com/flyover-reverse-engineering/pkg/mps/pro"
 )
 
 // Session has the session ID for AuthURL
@@ -15,9 +14,9 @@ type TokenP1 string
 
 // AuthContext holds all additional parameters that are required for AuthURL
 type AuthContext struct {
-	Session          Session
-	ResourceManifest pro.ResourceManifest
-	TokenP1          TokenP1
+	Session
+	ResourceManifest
+	TokenP1
 }
 
 // AuthURL authenticates a URL

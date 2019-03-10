@@ -10,7 +10,7 @@ Noticed differences between Google Earth and Apple Flyover during [previous proj
 |<img src="https://user-images.githubusercontent.com/46618410/52183147-db89e500-27fc-11e9-9c75-fc78ff6cda58.jpg" alt="Google" title="Google"  width=100%>|<img src="https://user-images.githubusercontent.com/46618410/52183145-d62c9a80-27fc-11e9-9396-2d0acb34ec03.jpg" alt="Apple" title="Apple" width=100%>|
 
 #### General
-Data in stored in map tiles. These five tile styles are used for flyover:
+Data is stored in map tiles. These five tile styles are used for Flyover:
 
 |Type  | Purpose                                     | URL structure                                        |
 |------|---------------------------------------------|------------------------------------------------------|
@@ -39,28 +39,39 @@ ResourceManifest
 Focusing on C3M(M) for now. DTMs are just images with a footer; they're probably used for the [grid](https://user-images.githubusercontent.com/46618410/53483243-fdcbf700-3a78-11e9-8fc0-ad6cfa8c57cd.png) that is displayed when Maps is loading.
 
 #### Code
-Pull this repository including submodules and install [Go](https://golang.org/). Then edit `config.json`:
+This repository is structured as follows:
+
+|Directory           | Description                  |
+|--------------------|------------------------------|
+|[cmd](./cmd)        | command line programs        |
+|[pkg](./pkg)        | most of the actual code      |
+|[proto](./proto)    | protobuf files               |
+|[scripts](./scripts)| additional scripts (node.js) |
+|[vendor](./vendor)  | dependencies                 |
+
+##### Install
+Clone including submodules and install [Go](https://golang.org/). Then edit `config.json`:
 - `resourceManifestURL`: see [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
 - `tokenP1`: see [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
 
-#### Authenticate URLs
+##### Authenticate URLs
 This authenticates a URL using parameters from `config.json`:
 ```
 go run cmd/auth/main.go [url]
 ```
 
-#### Parse C3M file
+##### Parse C3M file
 This parses a C3M v3 file, decompresses meshes, reads JPEG textures and produces a struct that contains a textured 3d model:
 ```
 go run cmd/parse-c3m/main.go [file]
 ```
 
-#### Parse C3MM file (work in progress)
+##### Parse C3MM file (work in progress)
 ```
 go run cmd/parse-c3mm/main.go [file]
 ```
 
-#### Export OBJ (proof of concept, inefficient)
+##### Export OBJ (proof of concept, inefficient)
 This exports Santa Monica Pier to `./export`:
 ```
 go run cmd/poc-export-obj/main.go

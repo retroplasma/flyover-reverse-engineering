@@ -100,6 +100,9 @@ type context struct {
 
 func getContext(cache mps.Cache, config config.Config) (m context, err error) {
 	ctx, err := mps.Init(cache, config)
+	if err != nil {
+		return
+	}
 	am, err := fly.GetAltitudeManifest(cache, ctx.ResourceManifest)
 	if err != nil {
 		return

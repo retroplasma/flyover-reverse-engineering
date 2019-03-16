@@ -36,11 +36,30 @@ func parseC3MM(data []byte) {
 	}
 	version := bin.ReadInt16(data, 4)
 	switch version {
+	case 1:
+		parseC3MMv1(data, 0 /* todo */)
 	case 2:
 		parseC3MMv2(data)
 	default:
-		panic("C3MM version != 2")
+		panic("Unknown C3MM version")
 	}
+}
+
+func parseC3MMv1(data []byte, part int) {
+	if "C3MM\x01\x00" != string(data[0:6]) {
+		panic("invalid C3MM v1 header")
+	}
+	l.Println("unkn6", bin.ReadInt32(data, 6))
+	l.Println("file type", data[10])
+	compressedSize := int(bin.ReadInt32(data, 19))
+	l.Println("compressed size", compressedSize)
+	uncompressedSize := int(bin.ReadInt32(data, 23))
+	l.Println("uncompressed size", uncompressedSize)
+	body := data[27:]
+	if uncompressedSize != compressedSize {
+		body = decompressLZMA(body, 0, len(body), uncompressedSize)
+	}
+	l.Println("body size", len(body))
 }
 
 func parseC3MMv2(data []byte) {

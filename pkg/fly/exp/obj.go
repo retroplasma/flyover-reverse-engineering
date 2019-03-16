@@ -57,9 +57,10 @@ map_Kd %s%s_%d.jpg
 		for _, vtx := range mesh.Vertices {
 			x, y, z := float64(vtx.X), float64(vtx.Y), float64(vtx.Z)
 			if transform {
-				x = c3m.Header.Rotation[0]*float64(vtx.X) + c3m.Header.Rotation[1]*float64(vtx.Y) + c3m.Header.Rotation[2]*float64(vtx.Z)
-				y = c3m.Header.Rotation[3]*float64(vtx.X) + c3m.Header.Rotation[4]*float64(vtx.Y) + c3m.Header.Rotation[5]*float64(vtx.Z)
-				z = c3m.Header.Rotation[6]*float64(vtx.X) + c3m.Header.Rotation[7]*float64(vtx.Y) + c3m.Header.Rotation[8]*float64(vtx.Z)
+				x, y, z =
+					c3m.Header.Rotation[0]*x+c3m.Header.Rotation[1]*y+c3m.Header.Rotation[2]*z,
+					c3m.Header.Rotation[3]*x+c3m.Header.Rotation[4]*y+c3m.Header.Rotation[5]*z,
+					c3m.Header.Rotation[6]*x+c3m.Header.Rotation[7]*y+c3m.Header.Rotation[8]*z
 				x += c3m.Header.Translation[0]
 				y += c3m.Header.Translation[1]
 				z += c3m.Header.Translation[2]

@@ -53,7 +53,7 @@ This repository is structured as follows:
 |[vendor](./vendor)  | dependencies                 |
 
 ##### Install
-Clone repo including submodules and install [Go](https://golang.org/). Then edit [config.json](config.json):
+Install [Go](https://golang.org/) and run `go get github.com/retroplasma/flyover-reverse-engineering`. Then edit [config.json](config.json):
 - automatically on macOS:
   - `./scripts/get_config_macos.sh > config.json`
 - or manually:

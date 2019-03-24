@@ -3,7 +3,7 @@ package internal
 import (
 	"bytes"
 
-	"github.com/flyover-reverse-engineering/pkg/bin"
+	"github.com/retroplasma/flyover-reverse-engineering/pkg/bin"
 )
 
 func (table HuffmanTable) Decode(data []byte, len1 int, len2 int, writeBuf *[]byte) {

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/flyover-reverse-engineering/pkg/mps/config"
+	"github.com/retroplasma/flyover-reverse-engineering/pkg/mps/config"
 
-	"github.com/flyover-reverse-engineering/pkg/mps"
+	"github.com/retroplasma/flyover-reverse-engineering/pkg/mps"
 )
 
 var cache = mps.Cache{Enabled: true, Directory: "./cache"}

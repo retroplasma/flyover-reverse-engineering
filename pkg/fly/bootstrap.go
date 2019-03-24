@@ -8,8 +8,8 @@ import (
 	"path"
 	"regexp"
 
-	"github.com/flyover-reverse-engineering/pkg/mps"
-	"github.com/flyover-reverse-engineering/pkg/web"
+	"github.com/retroplasma/flyover-reverse-engineering/pkg/mps"
+	"github.com/retroplasma/flyover-reverse-engineering/pkg/web"
 )
 
 type AltitudeManifest struct {

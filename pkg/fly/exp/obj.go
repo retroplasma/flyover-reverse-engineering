@@ -6,8 +6,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/flyover-reverse-engineering/pkg/fly/c3m"
-	"github.com/flyover-reverse-engineering/pkg/oth"
+	"github.com/retroplasma/flyover-reverse-engineering/pkg/fly/c3m"
+	"github.com/retroplasma/flyover-reverse-engineering/pkg/oth"
 )
 
 var transform = true

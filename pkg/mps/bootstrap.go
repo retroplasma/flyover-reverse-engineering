@@ -6,9 +6,9 @@ import (
 	"path"
 	"time"
 
-	"github.com/flyover-reverse-engineering/pkg/mps/auth"
-	"github.com/flyover-reverse-engineering/pkg/mps/config"
-	"github.com/flyover-reverse-engineering/pkg/web"
+	"github.com/retroplasma/flyover-reverse-engineering/pkg/mps/auth"
+	"github.com/retroplasma/flyover-reverse-engineering/pkg/mps/config"
+	"github.com/retroplasma/flyover-reverse-engineering/pkg/web"
 	"github.com/golang/protobuf/proto"
 )
 

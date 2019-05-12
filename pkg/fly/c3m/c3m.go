@@ -83,7 +83,7 @@ func parseC3Mv3(data []byte) C3M {
 			l.Printf("Scene Graph? / Animation? at 0x%x (%d)", offset, offset)
 			l.SetPrefix(l.Prefix() + "  ")
 			l.Printf("Not implemented, can't skip yet")
-			os.Exit(1)
+			return c3m
 		default:
 			panic("Invalid item type")
 		}

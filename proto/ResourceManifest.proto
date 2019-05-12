@@ -6,6 +6,7 @@ message ResourceManifest {
 	string token_p2 = 30;
 	string cache_base_url = 31;
 	repeated CacheFile cache_file = 72;
+	repeated string cache_file_2 = 9;
 
 	message CacheFile {
 		string file_name = 2;

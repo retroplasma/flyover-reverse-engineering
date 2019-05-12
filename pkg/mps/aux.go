@@ -27,6 +27,14 @@ func (rm ResourceManifest) CacheFileNameFromRegexp(regexp *regexp.Regexp) (fn st
 		}
 	}
 	if fn == "" {
+		for _, cf := range rm.CacheFile_2 {
+			if regexp.MatchString(cf) {
+				fn = cf
+				break
+			}
+		}
+	}
+	if fn == "" {
 		err = errors.New(fmt.Sprint("no cache file for regexp", regexp.String()))
 	}
 	return

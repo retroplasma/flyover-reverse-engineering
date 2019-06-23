@@ -2,6 +2,9 @@
 
 This is an attempt to reverse-engineer *Flyover* (= 3D satellite mode) from Apple Maps. Main goal is to document the results and to provide code that emerges.
 
+#### Status
+We can authenticate URLs and retrieve textured 3D models from given coordinates (latitude, longitude). Limitation: Inefficient lookup for regions with tall models such as skyscrapers, which is because not all metadata has been reverse-engineered yet; see [status board](https://github.com/retroplasma/flyover-reverse-engineering/projects/1) for details.
+
 #### Motivation
 Noticed differences between Google Earth and Apple Flyover during [previous project](https://github.com/retroplasma/earth-reverse-engineering). Extreme example:
 
@@ -37,9 +40,6 @@ ResourceManifest
    └─ DTM?
 ```
 Focusing on C3M(M) for now. DTMs are just images with a footer; they're probably used for the [grid](https://user-images.githubusercontent.com/46618410/53483243-fdcbf700-3a78-11e9-8fc0-ad6cfa8c57cd.png) that is displayed when Maps is loading.
-
-#### Status
-[Here](https://github.com/retroplasma/flyover-reverse-engineering/projects/1)
 
 #### Code
 This repository is structured as follows:

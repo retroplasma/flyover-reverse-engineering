@@ -3,7 +3,7 @@
 This is an attempt to reverse-engineer *Flyover* (= 3D satellite mode) from Apple Maps. Main goal is to document the results and to provide code that emerges.
 
 #### Status
-We can authenticate URLs and retrieve textured 3D models from given coordinates (latitude, longitude). Limitation: Inefficient lookup for regions with tall models such as skyscrapers, which is because not all metadata has been reverse-engineered yet; see [status board](https://github.com/retroplasma/flyover-reverse-engineering/projects/1) for details.
+We can authenticate URLs and retrieve textured 3D models from given coordinates (latitude, longitude). Limitation: Slow lookup for regions with tall models such as skyscrapers, which is because not all metadata has been reverse-engineered yet; see [status board](https://github.com/retroplasma/flyover-reverse-engineering/projects/1) for details.
 
 #### Motivation
 Noticed differences between Google Earth and Apple Flyover during [previous project](https://github.com/retroplasma/earth-reverse-engineering). Extreme example:
@@ -63,7 +63,7 @@ Install [Go](https://golang.org/) and run `go get github.com/retroplasma/flyover
 ##### Command line programs
 Here are some independent command line programs that use code from [pkg](./pkg):
 
-###### Export OBJ (proof of concept, inefficient)
+###### Export OBJ (proof of concept, slow)
 
 Usage:
 ```

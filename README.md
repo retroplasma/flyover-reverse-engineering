@@ -88,6 +88,10 @@ Optional: Center-scale OBJ using node.js script:
 node scripts/center_scale_obj.js
 ```
 
+In Blender (compatible tutorial [here](https://github.com/retroplasma/earth-reverse-engineering/blob/1dd24a723513d7e96f249e2c635416d4596992c4/BLENDER.md)):
+
+<img src="https://user-images.githubusercontent.com/46618410/65068957-fa06b000-d989-11e9-9091-1e71874b0b0c.png" width="300px">
+
 
 ###### Authenticate URLs
 This authenticates a URL using parameters from `config.json`:

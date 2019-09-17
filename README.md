@@ -64,24 +64,30 @@ Install [Go](https://golang.org/) and run `go get github.com/retroplasma/flyover
 Here are some independent command line programs that use code from [pkg](./pkg):
 
 ###### Export OBJ (proof of concept, inefficient)
-This exports Santa Monica Pier to `./export`:
+
+Usage:
+```
+go run cmd/poc-export-obj/main.go [lat] [lon] [zoom] [tryXY] [tryH]
+
+Parameter   Description       Example
+--------------------------------------
+lat         Latitude          34.007603
+lon         Longitude         -118.499741
+zoom        Zoom (~ 13-20)    20
+tryXY       Horizontal scan   3
+tryH        Vertical scan     2
+```
+
+This exports Santa Monica Pier to `./downloaded_files/obj/...`:
 ```
 go run cmd/poc-export-obj/main.go 34.007603 -118.499741 20 3 2
 ```
 
-Usage:
-
+Optional: Center-scale OBJ using node.js script:
 ```
-go run cmd/poc-export-obj/main.go [lat] [lon] [zoom] [tryXY] [tryH]
-
-  Name    Description       Example
-  --------------------------------------
-  lat     Latitude          34.007603
-  lon     Longitude         -118.499741
-  zoom    Zoom (~ 13-20)    20
-  tryXY   Horizontal scan   3
-  tryH    Vertical scan     2
+node scripts/center_scale_obj.js
 ```
+
 
 ###### Authenticate URLs
 This authenticates a URL using parameters from `config.json`:

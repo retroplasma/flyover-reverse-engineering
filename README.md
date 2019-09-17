@@ -66,7 +66,21 @@ Here are some independent command line programs that use code from [pkg](./pkg):
 ###### Export OBJ (proof of concept, inefficient)
 This exports Santa Monica Pier to `./export`:
 ```
-go run cmd/poc-export-obj/main.go
+go run cmd/poc-export-obj/main.go 34.007603 -118.499741 20 3 2
+```
+
+Usage:
+
+```
+go run cmd/poc-export-obj/main.go [lat] [lon] [zoom] [tryXY] [tryH]
+
+  Name    Description       Example
+  --------------------------------------
+  lat     Latitude          34.007603
+  lon     Longitude         -118.499741
+  zoom    Zoom (~ 13-20)    20
+  tryXY   Horizontal scan   3
+  tryH    Vertical scan     2
 ```
 
 ###### Authenticate URLs

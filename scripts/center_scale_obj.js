@@ -6,14 +6,19 @@
 const fs = require('fs');
 const readline = require('readline');
 const path = require('path');
-const OBJ_DIR = './export/';
+const OBJ_DIR = './downloaded_files/obj';
 
-for (let j of fs.readdirSync(OBJ_DIR)) {
-		j = path.resolve(OBJ_DIR,j )
+for (let i of fs.readdirSync(OBJ_DIR)) {
+	i = path.resolve(OBJ_DIR, i);
+	if (!fs.statSync(i).isDirectory()) continue;
+
+	for (let j of fs.readdirSync(i)) {
+		j = path.resolve(i, j);
 		if (!/\.obj$/.test(j) || /\.2\.obj$/.test(j)) continue;
 		if (!fs.statSync(j).isFile()) continue;
 
 		scaleMoveObj(j, `${j.match(/(.*)\.obj$/)[1]}.2.obj`);
+	}
 }
 
 const SCALE = 10;

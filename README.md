@@ -5,13 +5,6 @@ This is an attempt to reverse-engineer *Flyover* (= 3D satellite mode) from Appl
 #### Status
 We can authenticate URLs and retrieve textured 3D models from given coordinates (latitude, longitude). Limitation: Slow lookup for regions with tall models such as skyscrapers, which is because not all metadata has been reverse-engineered yet; see [status board](https://github.com/retroplasma/flyover-reverse-engineering/projects/1) for details.
 
-#### Motivation
-Noticed differences between Google Earth and Apple Flyover during [previous project](https://github.com/retroplasma/earth-reverse-engineering). Extreme example:
-
-|Google Earth|Apple Flyover|
-|------------|-------------|
-|<img src="https://user-images.githubusercontent.com/46618410/52183147-db89e500-27fc-11e9-9c75-fc78ff6cda58.jpg" alt="Google" title="Google"  width=100%>|<img src="https://user-images.githubusercontent.com/46618410/52183145-d62c9a80-27fc-11e9-9396-2d0acb34ec03.jpg" alt="Apple" title="Apple" width=100%>|
-
 #### General
 Data is stored in map tiles. These five tile styles are used for Flyover:
 

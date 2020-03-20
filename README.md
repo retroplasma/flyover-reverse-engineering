@@ -1,8 +1,15 @@
 <img width="100%" alt="Santa Monica Pier" title="Santa Monica Pier" src="https://user-images.githubusercontent.com/46618410/53480398-0a4d5100-3a73-11e9-983e-99f24ebdf674.png">
 
-This is an attempt to reverse-engineer *Flyover* (= 3D satellite mode) from Apple Maps. Main goal is to document the results and to provide code that emerges.
+This is an attempt to reverse-engineer *Flyover* (= 3D satellite mode) from Apple Maps. The goal is to document the results and to provide code that emerges. Similar work is being done for Google Earth [here](https://github.com/retroplasma/earth-reverse-engineering).
 
 #### Status
+Roughly speaking, these parts have been figured out:
+- bootstrap of manifests
+- URL structure
+- authentication algorithm
+- map tiling and conversion from geo coordinates
+- mesh decompression (huffman tables, edgebreaker variant etc.)
+
 We can authenticate URLs and retrieve textured 3D models from given coordinates (latitude, longitude). Limitation: Slow lookup for regions with tall models such as skyscrapers, which is because not all metadata has been reverse-engineered yet; see [status board](https://github.com/retroplasma/flyover-reverse-engineering/projects/1) for details.
 
 #### General

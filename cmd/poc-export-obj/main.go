@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -116,13 +118,20 @@ func (ctx context) exportOBJ(dir string, lat, lon float64, tryXY, tryH int, z in
 				url := fmt.Sprintf("%s?style=15&v=%d&region=%d&x=%d&y=%d&z=%d&h=%d", urlPrefix, p.Version, p.Region, x+d1, y+d2, z, i)
 				authURL, err := authCtx.AuthURL(url)
 				oth.CheckPanic(err)
-				//l.Println("Downloading...")
-				data, err := web.Get(authURL)
-				oth.CheckPanic(err)
-				//l.Println("Decoding...")
+
+				jpgErr := errors.New("received jpeg")
+				data, err := web.GetWithCheck(authURL, func(res *http.Response) (err error) {
+					// fail early if there's a jpeg, which is sometimes sent if there's no c3m
+					if res.Header.Get("content-type") == "image/jpeg" {
+						err = jpgErr
+					}
+					return
+				})
+				if err != jpgErr {
+					oth.CheckPanic(err)
+				}
 
 				if len(data) == 0 {
-					//l.Println("Skipping")
 					numSkippedDataTmp++
 					if numSkippedDataTmp == tryH+5 {
 						l.Println("Searching...")

@@ -9,8 +9,9 @@ Roughly speaking, these parts have been figured out:
 - authentication algorithm
 - map tiling and conversion from geo coordinates
 - mesh decompression (huffman tables, edgebreaker variant etc.)
+- tile lookup using octree
 
-We can authenticate URLs and retrieve textured 3D models from given coordinates (latitude, longitude). Limitation: Slow lookup for regions with tall models such as skyscrapers, which is because not all metadata has been reverse-engineered yet; see [status board](https://github.com/retroplasma/flyover-reverse-engineering/projects/1) for details.
+We can authenticate URLs and retrieve textured 3D models from given coordinates (latitude, longitude).
 
 #### General
 Data is stored in map tiles. These five tile styles are used for Flyover:
@@ -39,7 +40,7 @@ ResourceManifest
    │  └─ C3M
    └─ DTM?
 ```
-Focusing on C3M(M) for now. DTMs are just images with a footer; they're probably used for the [grid](https://user-images.githubusercontent.com/46618410/53483243-fdcbf700-3a78-11e9-8fc0-ad6cfa8c57cd.png) that is displayed when Maps is loading.
+Focusing on C3M(M) for now. DTMs are images with a footer and are probably used for the [grid](https://user-images.githubusercontent.com/46618410/53483243-fdcbf700-3a78-11e9-8fc0-ad6cfa8c57cd.png) that is displayed when Maps is loading.
 
 #### Code
 This repository is structured as follows:
@@ -63,7 +64,7 @@ Install [Go](https://golang.org/) and run `go get github.com/retroplasma/flyover
 ##### Command line programs
 Here are some independent command line programs that use code from [pkg](./pkg):
 
-###### Export OBJ (proof of concept, slow)
+###### Export OBJ (proof of concept)
 
 Usage:
 ```
@@ -74,13 +75,13 @@ Parameter   Description       Example
 lat         Latitude          34.007603
 lon         Longitude         -118.499741
 zoom        Zoom (~ 13-20)    20
-tryXY       Horizontal scan   3
-tryH        Vertical scan     2
+tryXY       Area scan         3
+tryH        Altitude scan     40
 ```
 
 This exports Santa Monica Pier to `./downloaded_files/obj/...`:
 ```
-go run cmd/poc-export-obj/main.go 34.007603 -118.499741 20 3 2
+go run cmd/poc-export-obj/main.go 34.007603 -118.499741 20 3 40
 ```
 
 Optional: Center-scale OBJ using node.js script:

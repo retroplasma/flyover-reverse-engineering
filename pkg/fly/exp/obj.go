@@ -37,14 +37,11 @@ func (e *OBJExport) Next(c3m c3m.C3M, subPfx string) {
 		oth.CheckPanic(err)
 		mtllib += fmt.Sprintf(`
 newmtl mtl_%s_%d
-Ka 1.000000 1.000000 1.000000
-Kd 1.000000 1.000000 1.000000
-Ks 0.000000 0.000000 0.000000
-Tr 1.000000
-illum 1
-Ns 0.000000
+Kd 1.000 1.000 1.000
+d 1.0
+illum 0
 map_Kd %s%s_%d.jpg
-	`, subPfx, i, fnPfx, subPfx, i)
+`, subPfx, i, fnPfx, subPfx, i)
 	}
 	err := write(fmt.Sprintf(path.Join(dir, "%smodel.mtl"), fnPfx), mtllib, first)
 	oth.CheckPanic(err)

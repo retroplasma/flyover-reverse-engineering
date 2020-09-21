@@ -106,9 +106,10 @@ This parses a C3M v3 file, decompresses meshes, reads JPEG textures and produces
 go run cmd/parse-c3m/main.go [file]
 ```
 
-###### Parse C3MM file (work in progress)
+###### Parse C3MM file
+This parses a C3MM v1 file. The C3MM files in a region span octrees whose roots are indexed in the first file.
 ```
-go run cmd/parse-c3mm/main.go [file]
+go run cmd/parse-c3mm/main.go [file] [[file_number]]
 ```
 
 #### Files on macOS

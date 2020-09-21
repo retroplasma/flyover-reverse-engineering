@@ -64,11 +64,11 @@ Install [Go](https://golang.org/) and run `go get github.com/retroplasma/flyover
 ##### Command line programs
 Here are some command line programs that use code from [pkg](./pkg):
 
-###### Export OBJ [<sup>[code]</sup>](./cmd/poc-export-obj/main.go)
+###### Export OBJ [<sup>[code]</sup>](./cmd/export-obj/main.go)
 
 Usage:
 ```
-go run cmd/poc-export-obj/main.go [lat] [lon] [zoom] [tryXY] [tryH]
+go run cmd/export-obj/main.go [lat] [lon] [zoom] [tryXY] [tryH]
 
 Parameter   Description       Example
 --------------------------------------
@@ -81,7 +81,7 @@ tryH        Altitude scan     40
 
 This exports Santa Monica Pier to `./downloaded_files/obj/...`:
 ```
-go run cmd/poc-export-obj/main.go 34.007603 -118.499741 20 3 40
+go run cmd/export-obj/main.go 34.007603 -118.499741 20 3 40
 ```
 
 Optional: Center-scale OBJ using node.js script:

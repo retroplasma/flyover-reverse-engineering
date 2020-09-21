@@ -62,9 +62,9 @@ Install [Go](https://golang.org/) and run `go get github.com/retroplasma/flyover
   - `tokenP1`: from [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
 
 ##### Command line programs
-Here are some independent command line programs that use code from [pkg](./pkg):
+Here are some command line programs that use code from [pkg](./pkg):
 
-###### Export OBJ (proof of concept)
+###### Export OBJ [<sup>[code]</sup>](./cmd/poc-export-obj/main.go)
 
 Usage:
 ```
@@ -94,19 +94,19 @@ In Blender (compatible tutorial [here](https://github.com/retroplasma/earth-reve
 <img src="https://user-images.githubusercontent.com/46618410/65068957-fa06b000-d989-11e9-9091-1e71874b0b0c.png" width="300px">
 
 
-###### Authenticate URLs
+###### Authenticate URL [<sup>[code]</sup>](./cmd/auth/main.go)
 This authenticates a URL using parameters from `config.json`:
 ```
 go run cmd/auth/main.go [url]
 ```
 
-###### Parse C3M file
+###### Parse C3M file [<sup>[code]</sup>](./cmd/parse-c3m/main.go)
 This parses a C3M v3 file, decompresses meshes, reads JPEG textures and produces a struct that contains a textured 3d model:
 ```
 go run cmd/parse-c3m/main.go [file]
 ```
 
-###### Parse C3MM file
+###### Parse C3MM file [<sup>[code]</sup>](./cmd/parse-c3mm/main.go)
 This parses a C3MM v1 file. The C3MM files in a region span octrees whose roots are indexed in the first file.
 ```
 go run cmd/parse-c3mm/main.go [file] [[file_number]]

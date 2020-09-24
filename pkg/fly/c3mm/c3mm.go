@@ -163,14 +163,14 @@ func (c C3MM) GetOctant(rootShift *int, partShift int) Octant {
 	valueD := bin.ReadInt32(s, 5)
 	valueCm := float32(valueC) * c.Header.Mult1
 	valueBm := (float32(valueB) * c.Header.Mult2) + valueCm
-	return Octant{Bits: valueA, Unkn1: valueBm, Unkn2: valueCm, Next: int(valueD)}
+	return Octant{Bits: valueA, AltitudeHigh: valueBm, AltitudeLow: valueCm, Next: int(valueD)}
 }
 
 type Octant struct {
-	Bits  int16
-	Unkn1 float32
-	Unkn2 float32
-	Next  int
+	Bits         int16
+	AltitudeHigh float32
+	AltitudeLow  float32
+	Next         int
 }
 
 type FileIndex struct {

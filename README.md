@@ -1,4 +1,4 @@
-<img width="100%" alt="Santa Monica Pier" title="Santa Monica Pier" src="https://user-images.githubusercontent.com/46618410/53480398-0a4d5100-3a73-11e9-983e-99f24ebdf674.png">
+<img alt="header" title="Header image: 41.8902, 12.4923" width="100%" src="https://user-images.githubusercontent.com/46618410/94180911-07108600-fe9f-11ea-92d1-3d0960df4c0a.jpg">
 
 This is an attempt to reverse-engineer *Flyover* (= 3D satellite mode) from Apple Maps. The goal is to document the results and to provide code that emerges. Similar work is being done for Google Earth [here](https://github.com/retroplasma/earth-reverse-engineering).
 

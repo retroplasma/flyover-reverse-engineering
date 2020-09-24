@@ -16,6 +16,16 @@ func QuaternionToMatrix(qx, qy, qz, qw float64) (m [9]float64) {
 	return
 }
 
+// EarthRadiusByLatitude returns the WGS 84 earth radius by latitude
+func EarthRadiusByLatitude(latDeg float64) float64 {
+	r1 := 6378137.0         // equator
+	r2 := 6356752.314245179 // poles
+	lat := latDeg / 180.0 * math.Pi
+	r := math.Sqrt((math.Pow(math.Pow(r1, 2)*math.Cos(lat), 2) + math.Pow(math.Pow(r2, 2)*math.Sin(lat), 2)) /
+		(math.Pow(r1*math.Cos(lat), 2) + math.Pow(r2*math.Sin(lat), 2)))
+	return r
+}
+
 // LatLonToTileOSM converts coordinates to OSM tile numbers for a zoom level
 func LatLonToTileOSM(zoom int, lat, lon float64) (x, y int) {
 	n := float64(pow2(zoom))

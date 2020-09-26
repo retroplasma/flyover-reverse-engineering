@@ -96,11 +96,13 @@ func parseC3MMv1(data []byte, part int) (c3mm C3MM) {
 
 			for i := 0; i < len(seg); i += 17 {
 				root := Root{
-					Z:             int(bin.ReadInt32(seg, i)),
-					Y:             int(bin.ReadInt32(seg, i+4)), // inverted
-					X:             int(bin.ReadInt32(seg, i+4+4)),
-					H:             0,
-					Shift:         int(bin.ReadInt32(seg, i+4+4+4)),
+					Tile: Tile{
+						Z: int(bin.ReadInt32(seg, i)),
+						Y: int(bin.ReadInt32(seg, i+4)), // inverted
+						X: int(bin.ReadInt32(seg, i+4+4)),
+						H: 0,
+					},
+					Offset:        int(bin.ReadInt32(seg, i+4+4+4)),
 					StructureType: int(seg[i+4+4+4+4]),
 				}
 				if !(root.StructureType < 2) {
@@ -115,8 +117,15 @@ func parseC3MMv1(data []byte, part int) (c3mm C3MM) {
 			// sort
 			sort.Slice(c3mm.RootIndex.Entries, func(i, j int) bool {
 				entries := c3mm.RootIndex.Entries
-				return rootLess(entries[i], entries[j])
+				return entries[i].Tile.Less(entries[j].Tile)
 			})
+
+			c3mm.RootIndex.SmallestZ = c3mm.RootIndex.Entries[0].Tile.Z
+			for _, root := range c3mm.RootIndex.Entries {
+				if root.Tile.Z < c3mm.RootIndex.SmallestZ {
+					c3mm.RootIndex.SmallestZ = root.Tile.Z
+				}
+			}
 
 			offset += int(size)
 		}
@@ -142,58 +151,6 @@ type C3MM struct {
 	DataSection DataSection
 }
 
-func (c C3MM) GetOctant(rootShift *int, partShift int) Octant {
-	offset := *rootShift - partShift
-	*rootShift += 9
-	if offset%9 != 0 {
-		panic("offset%9 != 0")
-	}
-	s := c.DataSection.Raw[offset:]
-	if len(s)%9 != 0 {
-		panic("len(s)%9 != 0")
-	}
-	if len(s) == 0 {
-		panic("not sure if this can happen")
-		// if yes, make octant optional
-	}
-	//l.Println(c.Header.Mult1, c.Header.Mult2)
-	valueA := bin.ReadInt16(s, 0)
-	valueB := bin.ReadUInt8(s, 2)
-	valueC := bin.ReadInt16(s, 3)
-	valueD := bin.ReadInt32(s, 5)
-	valueCm := float32(valueC) * c.Header.Mult1
-	valueBm := (float32(valueB) * c.Header.Mult2) + valueCm
-	return Octant{Bits: valueA, AltitudeHigh: valueBm, AltitudeLow: valueCm, Next: int(valueD)}
-}
-
-type Octant struct {
-	Bits         int16
-	AltitudeHigh float32
-	AltitudeLow  float32
-	Next         int
-}
-
-type FileIndex struct {
-	Entries []int
-}
-
-type RootIndex struct {
-	Entries []Root
-}
-
-type DataSection struct {
-	Raw []byte
-}
-
-type Root struct {
-	Z             int
-	Y             int
-	X             int
-	H             int
-	Shift         int
-	StructureType int
-}
-
 type Header struct {
 	Unkn6            int
 	FileType         uint8
@@ -203,7 +160,41 @@ type Header struct {
 	UncompressedSize int
 }
 
-func rootLess(a Root, b Root) bool {
+type FileIndex struct {
+	Entries []int
+}
+
+type RootIndex struct {
+	SmallestZ int
+	Entries   []Root
+}
+
+type Root struct {
+	Tile          Tile
+	Offset        int
+	StructureType int
+}
+
+type DataSection struct {
+	Raw []byte
+}
+
+type Octant struct {
+	Bits         int16
+	AltitudeHigh float32
+	AltitudeLow  float32
+	Next         int
+}
+
+type Tile struct {
+	Z int
+	Y int
+	X int
+	H int
+}
+
+func (t Tile) Less(b Tile) bool {
+	a := t
 	if a.Z < b.Z {
 		return true
 	}

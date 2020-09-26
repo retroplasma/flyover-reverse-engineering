@@ -98,19 +98,6 @@ func main() {
 	err = os.MkdirAll(exportDir, 0755)
 	oth.CheckPanic(err)
 
-	c3mm0, err := ctx.getC3mm(p, 0)
-	oth.CheckPanic(err)
-	smallestZ := 999
-	for i := 0; i < len(c3mm0.RootIndex.Entries); i++ {
-		e := c3mm0.RootIndex.Entries[i]
-		if e.Z < smallestZ {
-			smallestZ = e.Z
-		}
-	}
-
-	c3mPfx, err := ctx.Context.ResourceManifest.URLPrefixFromStyleID(mps.ResourceManifest_StyleConfig_C3M)
-	oth.CheckPanic(err)
-
 	xp := 0
 	export := exp.New(exportDir, "exp_")
 	defer export.Close()
@@ -122,22 +109,14 @@ func main() {
 			for h := 0; h < int(tryH); h++ {
 				xn := x + int(d1)
 				yn := y + int(d2)
-				hn := h
-				ok, err := check(ctx, p, smallestZ, z, yn, xn, hn)
+				ok, err := ctx.checkTile(p, z, yn, xn, h)
 				if err != nil {
 					panic(err)
 				}
 				if !ok {
 					continue
 				}
-				yn = mth.TileCountPerAxis(z) - 1 - yn
-				url := fmt.Sprintf("%s?style=15&v=%d&region=%d&x=%d&y=%d&z=%d&h=%d", c3mPfx, p.Version, p.Region, xn, yn, z, hn)
-
-				data, err := ctx.get(url)
-				if err != nil {
-					panic(err)
-				}
-				tile, err := c3m.Parse(data)
+				tile, err := ctx.getTile(p, z, yn, xn, h)
 				if err != nil {
 					panic(err)
 				}
@@ -150,35 +129,41 @@ func main() {
 	l.Println(xp, "exported")
 }
 
-func check(ctx context, p fly.Trigger, smallestZ, z, y, x, h int) (bool, error) {
-	if z < smallestZ {
-		return false, errors.New("z too small")
-	}
+func (ctx *context) checkTile(p fly.Trigger, z, y, x, h int) (bool, error) {
+
+	tile := c3mm.Tile{Z: z, Y: y, X: x, H: h}
 
 	c3mm0, err := ctx.getC3mm(p, 0)
 	if err != nil {
 		return false, err
 	}
 
-	list := make([]tile, 0)
-	for z, y, x, h := z, y, x, h; z >= smallestZ; z, y, x, h = z-1, y/2, x/2, h/2 {
-		list = append(list, tile{z, y, x, h})
+	smallestZ := c3mm0.RootIndex.SmallestZ
+
+	if tile.Z < smallestZ {
+		return false, errors.New("z too small")
 	}
 
+	// list of tiles from requested to lowest level of detail
+	list := make([]c3mm.Tile, 0)
+	for t := tile; t.Z >= smallestZ; t = t.ZoomedOut() {
+		list = append(list, t)
+	}
+
+	// find octree root
 	root, listIdx := c3mm.Root{}, len(list)-1
 	for ; listIdx >= 0; listIdx-- {
 		t := list[listIdx]
-		z, y, x, h := t.z, t.y, t.x, t.h
 		n := len(c3mm0.RootIndex.Entries)
 		idx := sort.Search(n, func(i int) bool {
 			root := c3mm0.RootIndex.Entries[i]
-			return !(root.Z < z || root.Z <= z && (root.Y < y || root.Y <= y && (root.X < x || root.X <= x && root.H < h)))
+			return t.Less(root.Tile) || t == root.Tile
 		})
 		if idx == n {
 			continue
 		}
 		root = c3mm0.RootIndex.Entries[idx]
-		if !(z >= root.Z && (z > root.Z || y >= root.Y && (y > root.Y || x >= root.X && (x > root.X || h >= root.H)))) {
+		if t != root.Tile {
 			continue
 		}
 		break
@@ -187,74 +172,69 @@ func check(ctx context, p fly.Trigger, smallestZ, z, y, x, h int) (bool, error) 
 		return false, nil
 	}
 
-	octantShift := root.Shift
-	partNum := len(c3mm0.FileIndex.Entries) - 1
-	for i := 0; i < len(c3mm0.FileIndex.Entries)-1; i++ {
-		if octantShift < c3mm0.FileIndex.Entries[i+1] {
-			partNum = i
-			break
+	// readOctant reads an octant from c3mm files and moves the offset
+	readOctant := func(octantOffset *int) (c3mm.Octant, error) {
+		partNum := c3mm0.FileIndex.GetPartNumber(*octantOffset)
+		c3mm1, err := ctx.getC3mm(p, partNum)
+		if err != nil {
+			return c3mm.Octant{}, err
 		}
+		return c3mm1.GetOctant(octantOffset, c3mm0.FileIndex.Entries[partNum]), nil
 	}
-	c3mm1, err := ctx.getC3mm(p, partNum)
+
+	rootOffset := root.Offset
+	octant, err := readOctant(&rootOffset)
 	if err != nil {
 		return false, err
 	}
-	octant := c3mm1.GetOctant(&octantShift, c3mm0.FileIndex.Entries[partNum])
 
-	le := list[listIdx]
-	if le.z == z && le.y == y && le.x == x && le.h == h {
+	if list[listIdx] == tile {
 		return true, nil
 	}
 	if listIdx == 0 {
 		return false, nil
 	}
 
+	// traverse octree
 	for ; octant.Next > 0; listIdx-- {
-		octantShift = octant.Next
-		le := list[listIdx]
-		zn, yn, xn, hn := 1+le.z, 2*le.y, 2*le.x, 2*le.h
-		prepre := list[listIdx-1]
+		zoomedInActual := list[listIdx-1]
+		zoomedInCandidates := list[listIdx].ZoomedInCandidates()
 		bits := octant.Bits
-		bittestPassed := false
+		octantOffset := octant.Next
+		matched := false
 		for o := 0; o < 8; o++ {
 			if (bits>>(o*2))&1 != 1 {
 				continue
 			}
-
-			partNum := len(c3mm0.FileIndex.Entries) - 1
-			for i := 0; i < len(c3mm0.FileIndex.Entries)-1; i++ {
-				if octantShift < c3mm0.FileIndex.Entries[i+1] {
-					partNum = i
-					break
-				}
-			}
-			c3mm1, err := ctx.getC3mm(p, partNum)
+			octant, err = readOctant(&octantOffset)
 			if err != nil {
 				return false, err
 			}
-			octant = c3mm1.GetOctant(&octantShift, c3mm0.FileIndex.Entries[partNum])
-
-			yn2 := yn | (o>>1)&1
-			xn2 := xn | (o>>0)&1
-			hn2 := hn | (o>>2)&1
-
-			if zn == prepre.z && yn2 == prepre.y && xn2 == prepre.x && hn2 == prepre.h {
-				bittestPassed = true
+			if zoomedInCandidates(o) == zoomedInActual {
+				matched = true
 				break
 			}
 		}
-		if !bittestPassed {
+		if !matched {
 			return false, nil
 		}
-		if z == prepre.z && y == prepre.y && x == prepre.x && h == prepre.h {
+		if tile == zoomedInActual {
 			return true, nil
 		}
 	}
 	return false, nil
 }
 
-type tile struct {
-	z, y, x, h int
+func (ctx *context) getTile(p fly.Trigger, z, y, x, h int) (c3m.C3M, error) {
+	yn := mth.TileCountPerAxis(z) - 1 - y // invert y
+	url := fmt.Sprintf("%s?style=%d&v=%d&region=%d&x=%d&y=%d&z=%d&h=%d",
+		ctx.URLPrefixC3m, mps.ResourceManifest_StyleConfig_C3M, p.Version, p.Region, x, yn, z, h)
+
+	data, err := ctx.get(url)
+	if err != nil {
+		return c3m.C3M{}, err
+	}
+	return c3m.Parse(data)
 }
 
 func (ctx *context) getC3mm(p fly.Trigger, part int) (c3mm.C3MM, error) {
@@ -281,14 +261,8 @@ func (ctx *context) _getC3mm(p fly.Trigger, part int) (c3mm.C3MM, error) {
 	if err == nil {
 		return c3mm.Parse(file, part)
 	}
-	if ctx.URLPrefixC3mm == nil {
-		urlPfx, err := ctx.Context.ResourceManifest.URLPrefixFromStyleID(mps.ResourceManifest_StyleConfig_C3MM_1)
-		if err != nil {
-			return c3mm.C3MM{}, err
-		}
-		ctx.URLPrefixC3mm = &urlPfx
-	}
-	data, err := ctx.get(fmt.Sprintf("%s?style=14&v=%d&part=%d&region=%d", *ctx.URLPrefixC3mm, p.Version, part, p.Region))
+	data, err := ctx.get(fmt.Sprintf("%s?style=%d&v=%d&part=%d&region=%d",
+		ctx.URLPrefixC3mm, mps.ResourceManifest_StyleConfig_C3MM_1, p.Version, part, p.Region))
 	if err != nil {
 		return c3mm.C3MM{}, err
 	}
@@ -329,7 +303,7 @@ func (ctx context) get(url string) ([]byte, error) {
 func get(url string) (data []byte, err error) {
 	jpgErr := errors.New("received jpeg")
 	data, err = web.GetWithCheck(url, func(res *http.Response) (err error) {
-		// fail early if there's a jpeg, which is sometimes sent if there's no c3mm
+		// fail early if there's a jpeg, which is sometimes sent if there's no c3m(m)
 		if res.Header.Get("content-type") == "image/jpeg" {
 			err = jpgErr
 		}
@@ -341,7 +315,8 @@ func get(url string) (data []byte, err error) {
 type context struct {
 	Context          mps.Context
 	AltitudeManifest fly.AltitudeManifest
-	URLPrefixC3mm    *string
+	URLPrefixC3mm    string
+	URLPrefixC3m     string
 	C3mms            []*c3mm.C3MM
 }
 
@@ -354,6 +329,16 @@ func getContext(cache mps.Cache, config config.Config) (m context, err error) {
 	if err != nil {
 		return
 	}
-	m = context{ctx, am, nil, nil}
+
+	c3mmURLPrefix, err := ctx.ResourceManifest.URLPrefixFromStyleID(mps.ResourceManifest_StyleConfig_C3MM_1)
+	if err != nil {
+		return
+	}
+	c3mURLPrefix, err := ctx.ResourceManifest.URLPrefixFromStyleID(mps.ResourceManifest_StyleConfig_C3M)
+	if err != nil {
+		return
+	}
+
+	m = context{ctx, am, c3mmURLPrefix, c3mURLPrefix, nil}
 	return
 }

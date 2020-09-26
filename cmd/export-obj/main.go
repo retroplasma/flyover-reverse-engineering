@@ -109,6 +109,7 @@ func main() {
 
 	xp := 0
 	export := exp.New(exportDir, "exp_")
+	defer export.Close()
 
 	c3m.DisableLogs()
 

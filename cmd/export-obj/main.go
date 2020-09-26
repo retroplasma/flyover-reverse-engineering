@@ -77,6 +77,10 @@ func main() {
 	oth.CheckPanic(err)
 	config, err := config.FromJSONFile("./config.json")
 	oth.CheckPanic(err)
+	if !config.IsValid() {
+		fmt.Fprintln(os.Stderr, "please set values in config.json")
+		os.Exit(1)
+	}
 	ctx, err := getContext(cache, config)
 	oth.CheckPanic(err)
 

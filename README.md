@@ -53,12 +53,19 @@ This repository is structured as follows:
 |[scripts](./scripts)| additional scripts           |
 |[vendor](./vendor)  | dependencies                 |
 
-##### Install
-Install [Go](https://golang.org/) and run `go get github.com/retroplasma/flyover-reverse-engineering`. Then edit [config.json](config.json) in `$GOPATH/src/github.com/retroplasma/flyover-reverse-engineering`:
+##### Setup
+
+Install [Go](https://golang.org/) and run:
+```bash
+go get -d github.com/retroplasma/flyover-reverse-engineering/...
+cd "$(go env GOPATH)/src/github.com/retroplasma/flyover-reverse-engineering"
+```
+
+Then edit [config.json](config.json):
 - automatically on macOS:
   - `./scripts/get_config_macos.sh > config.json`
 - or manually:
-  - `resourceManifestURL`: from [com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
+  - `resourceManifestURL`: from [GEOConfigStore.db/com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
   - `tokenP1`: from [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
 
 ##### Command line programs
@@ -113,8 +120,10 @@ go run cmd/parse-c3mm/main.go [file] [[file_number]]
 ```
 
 #### Files on macOS
-- `~/Library/Preferences/com.apple.GEO.plist`
+- `/Library/Containers/com.apple.geod/Data/Library/Caches/com.apple.geod/GEOConfigStore.db`
   - last resource manifest url
+- `~/Library/Preferences/com.apple.GEO.plist`
+  - last resource manifest url ~prior to catalina
 - `~/Library/Caches/GeoServices/Resources/altitude-*.xml`
   - defines regions for c3m urls
   - `altitude-*.xml` url in resource manifest

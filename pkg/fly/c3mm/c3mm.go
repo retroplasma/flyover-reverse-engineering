@@ -61,7 +61,11 @@ func parseC3MMv1(data []byte, part int) (c3mm C3MM) {
 
 	body := data[27:]
 	if c3mm.Header.UncompressedSize != c3mm.Header.CompressedSize {
-		body = internal.DecompressLZMA(body, 0, len(body), c3mm.Header.UncompressedSize)
+		var err error
+		body, err = internal.DecompressLZMA(body, 0, len(body), c3mm.Header.UncompressedSize)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	offset := 0

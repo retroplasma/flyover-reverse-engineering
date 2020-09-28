@@ -99,8 +99,11 @@ func main() {
 	oth.CheckPanic(err)
 
 	xp := 0
-	export := exp.New(exportDir, "exp_")
-	defer export.Close()
+	export, err := exp.New(exportDir, "exp_")
+	oth.CheckPanic(err)
+	defer func() {
+		oth.CheckPanic(export.Close())
+	}()
 
 	c3m.DisableLogs()
 
@@ -121,7 +124,7 @@ func main() {
 					panic(err)
 				}
 				l.Println("Exporting", d1, d2, "h =", h)
-				export.Next(tile, fmt.Sprintf("%d", xp))
+				oth.CheckPanic(export.Next(tile, fmt.Sprintf("%d", xp)))
 				xp++
 			}
 		}

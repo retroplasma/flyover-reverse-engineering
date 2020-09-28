@@ -2,10 +2,12 @@ package exp
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
+	"runtime/debug"
 
 	"github.com/retroplasma/flyover-reverse-engineering/pkg/fly/c3m"
 	"github.com/retroplasma/flyover-reverse-engineering/pkg/oth"
@@ -14,47 +16,57 @@ import (
 var transform = true
 
 type Export interface {
-	Next(c3m c3m.C3M, subPfx string)
-	Close()
+	Next(c3m c3m.C3M, subPfx string) error
+	Close() error
 }
 
-func New(dir string, fnPfx string) Export {
-	objFile := create(path.Join(dir, fmt.Sprintf("%smodel.obj", fnPfx)))
-	mtlFile := create(path.Join(dir, fmt.Sprintf("%smodel.mtl", fnPfx)))
-	return &OBJExport{
-		dir:           dir,
-		fnPfx:         fnPfx,
-		vtxCount:      0,
-		objFile:       objFile,
-		objFileWriter: bufio.NewWriter(objFile),
-		mtlFile:       mtlFile,
-		mtlFileWriter: bufio.NewWriter(mtlFile),
+func New(dir string, fnPfx string) (Export, error) {
+	objWriter, err := newWriter(path.Join(dir, fmt.Sprintf("%smodel.obj", fnPfx)))
+	if err != nil {
+		return nil, err
 	}
+	mtlWriter, err := newWriter(path.Join(dir, fmt.Sprintf("%smodel.mtl", fnPfx)))
+	if err != nil {
+		return nil, err
+	}
+	return &OBJExport{
+		dir:       dir,
+		fnPfx:     fnPfx,
+		vtxCount:  0,
+		objWriter: objWriter,
+		mtlWriter: mtlWriter,
+	}, nil
 }
 
-func (e *OBJExport) Close() {
-	oth.CheckPanic(e.objFileWriter.Flush())
-	oth.CheckPanic(e.objFile.Close())
-	oth.CheckPanic(e.mtlFileWriter.Flush())
-	oth.CheckPanic(e.mtlFile.Close())
+func (e *OBJExport) Close() (err error) {
+	if err = e.objWriter.done(); err != nil {
+		return
+	}
+	if err = e.mtlWriter.done(); err != nil {
+		return
+	}
+	return
 }
 
 type OBJExport struct {
-	dir           string
-	fnPfx         string
-	vtxCount      int
-	objFile       *os.File
-	objFileWriter *bufio.Writer
-	mtlFile       *os.File
-	mtlFileWriter *bufio.Writer
+	dir       string
+	fnPfx     string
+	vtxCount  int
+	objWriter writer
+	mtlWriter writer
 }
 
-func (e *OBJExport) Next(c3m c3m.C3M, subPfx string) {
+func (e *OBJExport) Next(c3m c3m.C3M, subPfx string) (err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = errors.New(fmt.Sprintln(e, string(debug.Stack())))
+		}
+	}()
+
 	dir, fnPfx := e.dir, e.fnPfx
 
 	for i, material := range c3m.Materials {
-		err := ioutil.WriteFile(path.Join(dir, fmt.Sprintf("%s%s_%d.jpg", fnPfx, subPfx, i)), material.JPEG, 0655)
-		oth.CheckPanic(err)
+		oth.CheckPanic(ioutil.WriteFile(path.Join(dir, fmt.Sprintf("%s%s_%d.jpg", fnPfx, subPfx, i)), material.JPEG, 0655))
 		nxt := fmt.Sprintf(`
 newmtl mtl_%s_%d
 Kd 1.000 1.000 1.000
@@ -62,13 +74,12 @@ d 1.0
 illum 0
 map_Kd %s%s_%d.jpg
 `, subPfx, i, fnPfx, subPfx, i)
-		write(e.mtlFileWriter, nxt)
+		e.mtlWriter.write(nxt)
 	}
 
 	for i, mesh := range c3m.Meshes {
-
-		write(e.objFileWriter, fmt.Sprintf("mtllib %smodel.mtl\n", fnPfx))
-		write(e.objFileWriter, fmt.Sprintf("o test_%s_%d\n", subPfx, i))
+		e.objWriter.write(fmt.Sprintf("mtllib %smodel.mtl\n", fnPfx))
+		e.objWriter.write(fmt.Sprintf("o test_%s_%d\n", subPfx, i))
 		for _, vtx := range mesh.Vertices {
 			x, y, z := float64(vtx.X), float64(vtx.Y), float64(vtx.Z)
 			if transform {
@@ -81,30 +92,53 @@ map_Kd %s%s_%d.jpg
 				z += c3m.Header.Translation[2]
 			}
 
-			write(e.objFileWriter, fmt.Sprintln("v", x, y, z))
-			write(e.objFileWriter, fmt.Sprintln("vt", vtx.U, vtx.V))
+			e.objWriter.write(fmt.Sprintln("v", x, y, z))
+			e.objWriter.write(fmt.Sprintln("vt", vtx.U, vtx.V))
 		}
 
 		for i, group := range mesh.Groups {
-			write(e.objFileWriter, fmt.Sprintf("g g_%s_%d\n", subPfx, i))
-			write(e.objFileWriter, fmt.Sprintf("usemtl mtl_%s_%d\n", subPfx, i))
+			e.objWriter.write(fmt.Sprintf("g g_%s_%d\n", subPfx, i))
+			e.objWriter.write(fmt.Sprintf("usemtl mtl_%s_%d\n", subPfx, i))
 			for _, face := range group.Faces {
 				a, b, c := int(face.A)+1+e.vtxCount, int(face.B)+1+e.vtxCount, int(face.C)+1+e.vtxCount
-				write(e.objFileWriter, fmt.Sprintf("f %d/%d %d/%d %d/%d\n", a, a, b, b, c, c))
+				e.objWriter.write(fmt.Sprintf("f %d/%d %d/%d %d/%d\n", a, a, b, b, c, c))
 			}
 		}
 		e.vtxCount += len(mesh.Vertices)
 	}
+	return
 }
 
-func create(fn string) *os.File {
+func create(fn string) (*os.File, error) {
 	perm := os.O_CREATE | os.O_WRONLY | os.O_TRUNC
-	file, err := os.OpenFile(fn, perm, 0655)
-	oth.CheckPanic(err)
-	return file
+	return os.OpenFile(fn, perm, 0655)
 }
 
-func write(f *bufio.Writer, txt string) {
-	_, err := f.WriteString(txt)
+func (w *writer) write(txt string) {
+	_, err := w.writer.WriteString(txt)
 	oth.CheckPanic(err)
+}
+
+type writer struct {
+	file   *os.File
+	writer *bufio.Writer
+}
+
+func newWriter(fn string) (writer, error) {
+	f, err := create(fn)
+	if err != nil {
+		return writer{}, err
+	}
+	w := bufio.NewWriter(f)
+	return writer{file: f, writer: w}, nil
+}
+
+func (w writer) done() (err error) {
+	if err = w.writer.Flush(); err != nil {
+		return
+	}
+	if err = w.file.Close(); err != nil {
+		return
+	}
+	return
 }

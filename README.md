@@ -120,7 +120,7 @@ go run cmd/parse-c3mm/main.go [file] [[file_number]]
 ```
 
 #### Files on macOS
-- `/Library/Containers/com.apple.geod/Data/Library/Caches/com.apple.geod/GEOConfigStore.db`
+- `~/Library/Containers/com.apple.geod/Data/Library/Caches/com.apple.geod/GEOConfigStore.db`
   - last resource manifest url
 - `~/Library/Preferences/com.apple.GEO.plist`
   - last resource manifest url ~prior to catalina

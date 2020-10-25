@@ -10,6 +10,8 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
+	"sync"
 
 	"github.com/retroplasma/flyover-reverse-engineering/pkg/fly"
 	"github.com/retroplasma/flyover-reverse-engineering/pkg/fly/c3m"
@@ -25,10 +27,10 @@ import (
 var l = log.New(os.Stderr, "", 0)
 
 func printUsage(msg string) {
-	if msg == "" {
+	if msg != "" {
 		l.Println("Error:", msg)
 	}
-	l.Println("Usage", os.Args[0], "[lat] [lon] [zoom] [tryXY] [tryH]")
+	l.Println("Usage", os.Args[0], "[lat] [lon] [zoom] [tryXY] [tryH] [[--parallel]]")
 	l.Println()
 	l.Println("  Name    Description       Example")
 	l.Println("  --------------------------------------")
@@ -45,31 +47,49 @@ func printUsage(msg string) {
 func main() {
 
 	var err error
-	if len(os.Args) == 0 {
+	aReq := make([]string, 0)
+	aOpt := make([]string, 0)
+	for _, a := range os.Args[1:] {
+		if !strings.HasPrefix(a, "--") {
+			aReq = append(aReq, a)
+		} else {
+			aOpt = append(aOpt, a)
+		}
+	}
+	if len(os.Args) == 1 {
 		printUsage("")
 	}
-	if len(os.Args) != 6 {
+	if len(aReq) != 5 {
 		printUsage("Invalid argument number")
 	}
-	lat, err := strconv.ParseFloat(os.Args[1], 64)
+	lat, err := strconv.ParseFloat(aReq[0], 64)
 	if err != nil {
 		printUsage("Invalid lat")
 	}
-	lon, err := strconv.ParseFloat(os.Args[2], 64)
+	lon, err := strconv.ParseFloat(aReq[1], 64)
 	if err != nil {
-		printUsage("Invalite lon")
+		printUsage("Invalid lon")
 	}
-	zoom, err := strconv.ParseInt(os.Args[3], 10, 32)
+	zoom, err := strconv.ParseInt(aReq[2], 10, 32)
 	if err != nil {
 		printUsage("Invalid zoom")
 	}
-	tryXY, err := strconv.ParseInt(os.Args[4], 10, 32)
+	tryXY, err := strconv.ParseInt(aReq[3], 10, 32)
 	if err != nil {
 		printUsage("Invalid tryXY")
 	}
-	tryH, err := strconv.ParseInt(os.Args[5], 10, 32)
+	tryH, err := strconv.ParseInt(aReq[4], 10, 32)
 	if err != nil {
 		printUsage("Invalid tryH")
+	}
+	parallel := false
+	for _, a := range aOpt {
+		switch a {
+		case "--parallel":
+			parallel = true
+		default:
+			printUsage("Unknown param: " + a)
+		}
 	}
 
 	cache := mps.Cache{Enabled: true, Directory: "./cache"}
@@ -107,28 +127,58 @@ func main() {
 
 	c3m.DisableLogs()
 
-	for d1 := -tryXY; d1 <= tryXY; d1++ {
-		for d2 := -tryXY; d2 <= tryXY; d2++ {
+	// semaphore settings
+	dln := 1
+	if parallel {
+		dln = 16
+	}
+	sem := make(chan int, dln)
+	var wg sync.WaitGroup
+
+	// exporter for decoded tiles
+	ex, exDone := make(chan c3m.C3M, dln), make(chan int)
+	go func() {
+		for tile := range ex {
+			oth.CheckPanic(export.Next(tile, fmt.Sprintf("%d", xp)))
+			xp++
+		}
+		exDone <- 1
+	}()
+
+	// loop over area and altitude
+	for dx := -tryXY; dx <= tryXY; dx++ {
+		for dy := -tryXY; dy <= tryXY; dy++ {
 			for h := 0; h < int(tryH); h++ {
-				xn := x + int(d1)
-				yn := y + int(d2)
-				ok, err := ctx.checkTile(p, z, yn, xn, h)
+				xn := x + int(dx)
+				yn := y + int(dy)
+				hasTile, err := ctx.checkTile(p, z, yn, xn, h)
 				if err != nil {
 					panic(err)
 				}
-				if !ok {
+				if !hasTile {
 					continue
 				}
-				tile, err := ctx.getTile(p, z, yn, xn, h)
-				if err != nil {
-					panic(err)
-				}
-				l.Println("Exporting", d1, d2, "h =", h)
-				oth.CheckPanic(export.Next(tile, fmt.Sprintf("%d", xp)))
-				xp++
+
+				// async get tile
+				sem <- 1
+				wg.Add(1)
+				dx, dy, h := dx, dy, h
+				go func() {
+					defer wg.Done()
+					tile, err := ctx.getTile(p, z, yn, xn, h)
+					if err != nil {
+						panic(err)
+					}
+					l.Println("Exporting", dx, dy, "h =", h)
+					ex <- tile
+					<-sem
+				}()
 			}
 		}
 	}
+	wg.Wait() // wait for all tile loads to finish
+	close(ex) // no more tiles sent to exporter
+	<-exDone  // wait till all tiles are exported
 	l.Println(xp, "exported")
 }
 

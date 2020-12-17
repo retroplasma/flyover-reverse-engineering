@@ -62,9 +62,11 @@ cd "$(go env GOPATH)/src/github.com/retroplasma/flyover-reverse-engineering"
 ```
 
 Then edit [config.json](config.json):
-- automatically on macOS:
+- automatically (macOS, Linux, WSL):
+  - `./scripts/get_config.sh > config.json`
+- faster (macOS Catalina or older):
   - `./scripts/get_config_macos.sh > config.json`
-- or manually:
+- or manually (Catalina or older):
   - `resourceManifestURL`: from [GEOConfigStore.db/com.apple.GEO.plist](#files-on-macos) or [GeoServices](#files-on-macos) binary
   - `tokenP1`: from [GeoServices](#files-on-macos) binary (function: `GEOURLAuthenticationGenerateURL`)
 

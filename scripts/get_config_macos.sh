@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Generates config.json from files on macOS
+# Generates config.json from files on macOS Catalina or older
 
 set -Eeu
 

@@ -151,13 +151,14 @@ func main() {
 			for h := 0; h < int(tryH); h++ {
 				xn := x + int(dx)
 				yn := y + int(dy)
-				hasTile, err := ctx.checkTile(p, z, yn, xn, h)
+				/*hasTile, err := ctx.checkTile(p, z, yn, xn, h)
 				if err != nil {
 					panic(err)
 				}
 				if !hasTile {
 					continue
-				}
+				}*/
+				//jpgErr := errors.New("received jpeg")
 
 				// async get tile
 				sem <- 1
@@ -166,6 +167,10 @@ func main() {
 				go func() {
 					defer wg.Done()
 					tile, err := ctx.getTile(p, z, yn, xn, h)
+					if err != nil && err.Error() == "received jpeg" {
+						<-sem
+						return
+					}
 					if err != nil {
 						panic(err)
 					}

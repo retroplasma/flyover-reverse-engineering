@@ -3,7 +3,7 @@
 Reverse-engineering *Flyover* (3D satellite mode) from Apple Maps. Similar work is done for Google Earth [here](https://github.com/retroplasma/earth-reverse-engineering).
 
 #### Status
-Roughly speaking, these parts have been figured out:
+Roughly, these parts have been figured out:
 - bootstrap of manifests
 - URL structure
 - authentication algorithm

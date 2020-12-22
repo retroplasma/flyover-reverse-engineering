@@ -134,6 +134,14 @@ func parseC3MMv1(data []byte, part int) (c3mm C3MM) {
 			offset += int(size)
 		}
 
+		// skipping object tree
+		{
+			if 3 == body[offset] {
+				skip := int(bin.ReadInt32(body, offset+1))
+				offset += skip
+			}
+		}
+
 		// data section
 		{
 			if 1 != body[offset] {
